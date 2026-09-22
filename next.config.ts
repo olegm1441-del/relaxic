@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: { formats: ["image/avif", "image/webp"] },
+  images: {
+    // next/image пересобирает картинку под размер экрана и отдаёт AVIF или WebP.
+    // Поэтому в репозитории лежат исходники 2200 px: пользователь их целиком
+    // не качает, а запас под ретину и крупные экраны сохраняется.
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [384, 640, 750, 828, 1080, 1200, 1440, 1920, 2200],
+    imageSizes: [96, 128, 256, 384, 512, 640],
+    minimumCacheTTL: 60 * 60 * 24 * 365,
+  },
   poweredByHeader: false,
 };
 

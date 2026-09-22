@@ -21,6 +21,8 @@ export const COMPANY = {
   bankName: "—",
   bik: "000000000",
 
+  siteUrl: "https://relaxic-production.up.railway.app",
+
   // Настоящие данные
   phone: "+7 965 595-99-97",
   phoneHref: "tel:+79655959997",
