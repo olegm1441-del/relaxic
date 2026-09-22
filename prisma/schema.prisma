@@ -1,0 +1,284 @@
+// Relaxic — схема данных. Подробности: docs/02-TZ.md, раздел 8.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma 7: строка подключения живёт в prisma.config.ts, а не здесь.
+datasource db {
+  provider = "postgresql"
+}
+
+enum Technique {
+  PAINT_BY_NUMBERS
+  DIAMOND_MOSAIC
+  CROSS_STITCH
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  PAID
+  SHIPPED
+  DONE
+  CANCELLED
+}
+
+enum ArticleCategory {
+  FANDOM_GUIDE
+  WORKSHOP
+  STORIES
+  GIFT_GUIDE
+  RELAX
+  BACKSTAGE
+}
+
+model Fandom {
+  id          String         @id @default(cuid())
+  slug        String         @unique     // harry-potter
+  title       String                     // Гарри Поттер
+  brand       String?                    // правообладатель, для учёта
+  category    FandomCategory @default(FILM)
+  tagline     String?
+  description String?
+  coverUrl    String?
+  tags        String[]
+  sort        Int            @default(0)
+  products    Product[]
+}
+
+enum FandomCategory {
+  FILM
+  SERIES
+  GAME
+  CARTOON
+  ANIME
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  description String
+  story       String?
+  technique   Technique
+  fandomId    String
+  fandom      Fandom    @relation(fields: [fandomId], references: [id])
+  price       Int
+  oldPrice    Int?
+  difficulty  Int
+  hours       Int
+  colorsCount Int?
+  minAge      Int       @default(6)
+  boxContents Json
+  specs       Json
+  isHit       Boolean   @default(false)
+  isNew       Boolean   @default(false)
+  inStock     Boolean   @default(true)
+  isSeeded    Boolean   @default(false)   // демо-содержимое
+
+  seoTitle       String?
+  seoDescription String?
+
+  sizes      ProductSize[]
+  images     ProductImage[]
+  reviews    Review[]
+  orderItems OrderItem[]
+  bundles    BundleItem[]
+
+  createdAt DateTime @default(now())
+
+  @@index([technique, fandomId])
+  @@index([difficulty])
+}
+
+model ProductSize {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label     String
+  width     Int
+  height    Int
+  priceDiff Int     @default(0)
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String
+  sort      Int     @default(0)
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  number       String      @unique
+  customerName String
+  phone        String
+  email        String?
+  deliveryType String
+  address      String?
+  comment      String?
+  itemsTotal   Int
+  deliveryCost Int         @default(0)
+  total        Int
+  status       OrderStatus @default(NEW)
+  items        OrderItem[]
+
+  // Заказ сохраняется, даже если Telegram недоступен. ТЗ, раздел 5.
+  notifiedAt  DateTime?
+  notifyError String?
+
+  createdAt DateTime @default(now())
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  title     String
+  size      String
+  price     Int
+  qty       Int
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  authorName String
+  rating     Int
+  text       String
+  photoUrl   String?
+  isApproved Boolean  @default(false)
+  isSeeded   Boolean  @default(false)   // отделяет липовые от настоящих
+  createdAt  DateTime @default(now())
+}
+
+model Article {
+  id                String          @id @default(cuid())
+  slug              String          @unique
+  title             String
+  excerpt           String
+  content           String
+  category          ArticleCategory
+  coverUrl          String?
+  readMinutes       Int             @default(5)
+  relatedProductIds String[]
+  publishedAt       DateTime?
+
+  seoTitle       String?
+  seoDescription String?
+
+  @@index([category])
+}
+
+model GalleryItem {
+  id         String   @id @default(cuid())
+  isSeeded   Boolean  @default(false)
+  imageUrl   String
+  authorName String?
+  productId  String?
+  caption    String?
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model CustomRequest {
+  id        String     @id @default(cuid())
+  name      String
+  contact   String
+  technique Technique?
+  size      String?
+  comment   String?
+  imageUrl  String?
+  createdAt DateTime   @default(now())
+}
+
+// 152-ФЗ: без записи факта согласия его нельзя подтвердить при проверке.
+model Consent {
+  id            String   @id @default(cuid())
+  kind          String
+  analytics     Boolean  @default(false)
+  marketing     Boolean  @default(false)
+  policyVersion String
+  ip            String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+}
+
+model QuizResult {
+  id         String   @id @default(cuid())
+  forWhom    String
+  universe   String?
+  timeBudget String?
+  email      String?
+  createdAt  DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────────────────────
+// Реестр чатов Telegram.
+//
+// Bot API НЕ умеет перечислять чаты, в которых состоит бот: метода
+// вроде getChats не существует. Единственный способ узнать о чате —
+// поймать апдейт (my_chat_member приходит в момент добавления бота).
+// Поэтому чаты накапливаются здесь и переживают перезапуски.
+// ─────────────────────────────────────────────────────────────
+model TelegramChat {
+  chatId      String   @id              // у групп отрицательный
+  type        String                    // private | group | supergroup | channel
+  title       String?
+  username    String?
+
+  isAdmin     Boolean  @default(false)  // бот администратор
+  canPost     Boolean  @default(false)  // фактическое право писать
+  muted       Boolean  @default(false)  // выключен вручную
+
+  lastOkAt    DateTime?
+  lastError   String?
+  lastErrorAt DateTime?
+
+  discoveredAt DateTime @default(now())
+  checkedAt    DateTime?
+}
+
+// Курсор getUpdates и прочее состояние интеграции
+model TelegramState {
+  id         String   @id @default("singleton")
+  lastOffset Int      @default(0)
+  syncedAt   DateTime?
+}
+
+// Комплекты — главный инструмент добора до бесплатной доставки:
+// порог 5 000 ₽ при среднем чеке ~1 100 ₽ сам по себе не работает
+model Bundle {
+  id       String       @id @default(cuid())
+  slug     String       @unique
+  title    String
+  price    Int                              // дешевле суммы позиций
+  fandomId String?
+  isSeeded Boolean      @default(false)
+  items    BundleItem[]
+}
+
+model BundleItem {
+  id        String  @id @default(cuid())
+  bundleId  String
+  bundle    Bundle  @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+// Демо-режим: без пароля и подтверждения почты.
+// Заменить перед приёмом реальных платежей.
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  phone     String?
+  isDemo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+build/
+.env
+.env*.local
+*.log
+.DS_Store
+next-env.d.ts
+/prisma/dev.db*
+
+# Картинки храним в репозитории — они часть проекта.
+# Исключаем только исходники до сжатия и временные файлы.
+/public/img/**/_raw/
+*.psd
+*.ai
+Thumbs.db
