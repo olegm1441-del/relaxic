@@ -99,6 +99,8 @@ dim "  прописываю переменные…"
 set_var(){ railway variable set "$1" -s "$SERVICE" --skip-deploys >/dev/null 2>&1 \
         || railway variables --set "$1" -s "$SERVICE" --skip-deploys >/dev/null 2>&1; }
 
+# Без этого Nixpacks берёт Node 18, на котором Prisma 7 не ставится
+set_var 'NIXPACKS_NODE_VERSION=22'
 set_var 'DATABASE_URL=${{Postgres.DATABASE_URL}}'
 set_var "ADMIN_TOKEN=$ADMIN"
 [ -n "$TOKEN" ] && set_var "TELEGRAM_BOT_TOKEN=$TOKEN"
