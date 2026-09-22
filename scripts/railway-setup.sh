@@ -21,19 +21,40 @@ die(){ printf "\033[31m  ✕ %s\033[0m\n" "$1" >&2; exit 1; }
 say ""; say "  RELAXIC ✕  разворачиваю на Railway"; say ""
 
 # ── 1. CLI ───────────────────────────────────────────────────
-if ! command -v railway >/dev/null 2>&1; then
-  dim "  ставлю Railway CLI…"
-  if command -v brew >/dev/null 2>&1; then brew install railway >/dev/null 2>&1 || true; fi
-  command -v railway >/dev/null 2>&1 || npm i -g @railway/cli >/dev/null 2>&1
+install_cli(){
+  if command -v brew >/dev/null 2>&1; then brew install railway >/dev/null 2>&1 && return 0; fi
+  npm i -g @railway/cli >/dev/null 2>&1
+}
+command -v railway >/dev/null 2>&1 || { dim "  ставлю Railway CLI…"; install_cli; }
+command -v railway >/dev/null 2>&1 || die "Не смог поставить Railway CLI. Нужен Homebrew или Node.js."
+
+# Скрипт написан под CLI 5.x: в 4.x нет ни railway variable set,
+# ни --json у domain. Старую версию молча обновляем.
+CLI_MAJOR="$(railway --version 2>/dev/null | grep -oE '[0-9]+' | head -1)"
+if [ "${CLI_MAJOR:-0}" -lt 5 ]; then
+  dim "  Railway CLI ${CLI_MAJOR}.x устарел — обновляю…"
+  if command -v brew >/dev/null 2>&1 && brew list railway >/dev/null 2>&1; then
+    brew upgrade railway >/dev/null 2>&1 || true
+  fi
+  CLI_MAJOR="$(railway --version 2>/dev/null | grep -oE '[0-9]+' | head -1)"
+  if [ "${CLI_MAJOR:-0}" -lt 5 ]; then
+    npm i -g @railway/cli >/dev/null 2>&1 || true
+    hash -r 2>/dev/null || true
+  fi
 fi
-command -v railway >/dev/null 2>&1 || die "Не смог поставить Railway CLI. Нужен Node.js или Homebrew."
 ok "Railway CLI $(railway --version 2>/dev/null | head -1)"
 
 # ── 2. Вход ──────────────────────────────────────────────────
 if ! railway whoami >/dev/null 2>&1; then
   say ""
-  say "  Открою браузер для входа в Railway — это единственный ручной шаг."
-  railway login || die "Вход не удался."
+  say "  Вход в Railway — единственный ручной шаг."
+  dim "  Сейчас появится код и ссылка: откройте ссылку, введите код."
+  say ""
+  # Браузерный вход у Railway регулярно отваливается с
+  # «Error logging in to CLI, try again with --browserless»,
+  # поэтому сразу идём по коду.
+  railway login --browserless || railway login \
+    || die "Вход не удался. Попробуйте вручную: railway login --browserless"
 fi
 ok "вошли как $(railway whoami 2>/dev/null | tail -1)"
 
