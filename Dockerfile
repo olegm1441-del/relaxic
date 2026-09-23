@@ -13,7 +13,10 @@ WORKDIR /app
 
 # ── Сборка ───────────────────────────────────────────────────
 FROM base AS build
-ENV NODE_ENV=development
+# NODE_ENV здесь НЕ задаём. При NODE_ENV=development next build
+# собирает страницы по боевому пути, а React подтягивает dev-сборку —
+# пререндер /_global-error падает с «Cannot read properties of null
+# (reading 'useContext')». devDependencies ставит флаг --include=dev.
 # prisma/ копируется ДО npm ci. В package.json есть postinstall,
 # который вызывает prisma generate, а без схемы он падает с
 # «Could not find Prisma Schema» и роняет всю установку.

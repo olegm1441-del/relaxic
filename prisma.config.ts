@@ -11,6 +11,7 @@ export default defineConfig({
   },
   migrations: {
     path: "prisma/migrations",
-    seed: "tsx prisma/seed.ts",
+    // tsx — devDependency, в рантайм-образе его нет; сидер на чистом .mjs
+    seed: "node prisma/seed.mjs",
   },
 });
