@@ -60,20 +60,29 @@ VARS="$(railway variables -s "$SERVICE" --kv 2>/dev/null)"
 [ -z "$VARS" ] && VARS="$(railway variables -s "$SERVICE" 2>/dev/null)"
 
 has(){ grep -qi "$1" <<<"$VARS" 2>/dev/null; }
-setv(){ railway variables --set "$1" -s "$SERVICE" --skip-deploys >/dev/null 2>&1 \
-     || railway variable set "$1" -s "$SERVICE" --skip-deploys >/dev/null 2>&1; }
+# Разные версии CLI понимают разный синтаксис, поэтому перебираем
+setv(){
+  railway variables --set "$1" -s "$SERVICE" >/dev/null 2>&1 && return 0
+  railway variable set "$1" -s "$SERVICE"    >/dev/null 2>&1 && return 0
+  railway variables --set "$1"               >/dev/null 2>&1 && return 0
+  railway variable set "$1"                  >/dev/null 2>&1 && return 0
+  return 1
+}
 
-if has "DATABASE_URL"; then ok "DATABASE_URL задана"
+if [ -z "$VARS" ]; then
+  wa "не смог прочитать переменные через CLI — не страшно,"
+  d  "    после сборки сайт сам доложит, видит ли он базу"
+  setv 'DATABASE_URL=${{Postgres.DATABASE_URL}}' && ok "DATABASE_URL проставил на всякий случай" || true
+  setv "NEXT_PUBLIC_SITE_URL=$URL_DEFAULT" >/dev/null 2>&1 || true
 else
-  wa "DATABASE_URL нет — подключаю базу"
-  setv 'DATABASE_URL=${{Postgres.DATABASE_URL}}' \
-    && ok "DATABASE_URL проставлена" \
-    || no "не вышло. В панели: Variables → DATABASE_URL = \${{Postgres.DATABASE_URL}}"
+  has "DATABASE_URL" && ok "DATABASE_URL задана" \
+    || { setv 'DATABASE_URL=${{Postgres.DATABASE_URL}}' && ok "DATABASE_URL проставлена" \
+         || wa "задайте в панели: Variables → DATABASE_URL = \${{Postgres.DATABASE_URL}}"; }
+  has "NEXT_PUBLIC_SITE_URL" && ok "NEXT_PUBLIC_SITE_URL задана" \
+    || { setv "NEXT_PUBLIC_SITE_URL=$URL_DEFAULT" >/dev/null 2>&1 && ok "NEXT_PUBLIC_SITE_URL проставлена"; }
+  has "TELEGRAM_BOT_TOKEN" && ok "TELEGRAM_BOT_TOKEN задана" \
+    || wa "TELEGRAM_BOT_TOKEN нет — заказы в Telegram не уйдут"
 fi
-has "NEXT_PUBLIC_SITE_URL" && ok "NEXT_PUBLIC_SITE_URL задана" \
-  || { setv "NEXT_PUBLIC_SITE_URL=$URL_DEFAULT" && ok "NEXT_PUBLIC_SITE_URL проставлена"; }
-has "TELEGRAM_BOT_TOKEN" && ok "TELEGRAM_BOT_TOKEN задана" \
-  || wa "TELEGRAM_BOT_TOKEN нет — заказы в Telegram не уйдут"
 
 # ── Домен ────────────────────────────────────────────────────
 URL="$(railway domain -s "$SERVICE" --json 2>/dev/null | grep -oE '[a-z0-9.-]+\.up\.railway\.app' | head -1)"
@@ -105,7 +114,11 @@ done
 b ""
 if [ "$CODE" = "200" ]; then
   ok "сайт отвечает"; b ""; b "  $URL"; b ""
-  d "  здоровье: $(curl -s --max-time 8 "$URL/api/health")"
+  H="$(curl -s --max-time 10 "$URL/api/health")"
+  DB="$(node -e 'let r="";process.stdin.on("data",c=>r+=c).on("end",()=>{try{const j=JSON.parse(r);
+        console.log(j.db+(j.data?" — "+JSON.stringify(j.data):"")+(j.hint?"\n  подсказка: "+j.hint:""))}
+        catch(e){console.log(r)}})' <<<"$H" 2>/dev/null)"
+  d "  база: $DB"
 else
   no "сборка прошла, но сайт не отвечает (код $CODE)"
   b ""; d "  логи запуска — пришлите их в чат:"; d "  ──────────────────────────────"
