@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Relaxic — развернуть и сразу показать, что получилось.
-#   bash scripts/deploy.sh
+#   bash scripts/deploy.sh            имя сервиса определяется само
+#   bash scripts/deploy.sh my-service указать вручную
 set -uo pipefail
 
-SERVICE="relaxic"
-URL="https://relaxic-production.up.railway.app"
+URL_DEFAULT="https://relaxic-production.up.railway.app"
 LOG="/tmp/relaxic-deploy.log"
 
 b(){ printf "\033[38;2;232;72;43m%s\033[0m\n" "$1"; }
@@ -15,67 +15,101 @@ wa(){ printf "\033[33m  ! %s\033[0m\n" "$1"; }
 
 b ""; b "  RELAXIC ✕  развёртывание"; b ""
 
-# ── 1. Код ───────────────────────────────────────────────────
 git pull --rebase --quiet 2>/dev/null && ok "код обновлён ($(git rev-parse --short HEAD))" \
   || wa "git pull не прошёл — работаю с тем, что есть"
 
-# ── 2. CLI и вход ────────────────────────────────────────────
 command -v railway >/dev/null 2>&1 || { no "Railway CLI не установлен: npm i -g @railway/cli"; exit 1; }
 railway whoami >/dev/null 2>&1 || { no "не выполнен вход"; d "  railway login --browserless"; exit 1; }
-ok "вход: $(railway whoami 2>/dev/null | tail -1)"
+ok "вход выполнен"
+railway status >/dev/null 2>&1 || { no "папка не привязана"; d "  railway link"; exit 1; }
 
-railway status >/dev/null 2>&1 || { no "папка не привязана к проекту"; d "  railway link  (выберите relaxic → production → relaxic)"; exit 1; }
-ok "проект привязан"
+# ── Ищем сервис, а не угадываем ──────────────────────────────
+SERVICE="${1:-}"
+STATUS_JSON="$(railway status --json 2>/dev/null)"
 
-# ── 3. Переменные ────────────────────────────────────────────
-b ""; d "  переменные сервиса:"
-VARS="$(railway variables -s "$SERVICE" --kv 2>/dev/null || railway variables -s "$SERVICE" 2>/dev/null)"
-for v in DATABASE_URL TELEGRAM_BOT_TOKEN NEXT_PUBLIC_SITE_URL; do
-  if grep -q "^$v=" <<<"$VARS" 2>/dev/null || grep -q "$v" <<<"$VARS" 2>/dev/null; then
-    ok "$v задана"
-  else
-    [ "$v" = "DATABASE_URL" ] && no "$v НЕ ЗАДАНА — база не подключится" || wa "$v не задана"
-  fi
-done
-grep -q "DATABASE_URL" <<<"$VARS" || {
-  wa "пробую подключить базу автоматически"
-  railway variables --set 'DATABASE_URL=${{Postgres.DATABASE_URL}}' -s "$SERVICE" --skip-deploys >/dev/null 2>&1 \
-    && ok "DATABASE_URL проставлена" || no "не вышло — задайте в панели: DATABASE_URL = \${{Postgres.DATABASE_URL}}"
-}
+if [ -z "$SERVICE" ]; then
+  SERVICE="$(node -e '
+    let raw=""; process.stdin.on("data",c=>raw+=c).on("end",()=>{
+      let names=[];
+      const walk=(o)=>{ if(!o||typeof o!=="object")return;
+        if(Array.isArray(o))return o.forEach(walk);
+        if(typeof o.name==="string" && (o.id||o.serviceId)) names.push(o.name);
+        Object.values(o).forEach(walk); };
+      try{ walk(JSON.parse(raw)); }catch(e){}
+      const bad=/postgres|mysql|redis|mongo|volume/i;
+      const app=[...new Set(names)].filter(n=>!bad.test(n));
+      console.log(app[0]||"");
+    });' <<<"$STATUS_JSON" 2>/dev/null)"
+fi
 
-# ── 4. Сборка ────────────────────────────────────────────────
-b ""; b "  собираю (3–6 минут, логи ниже)"; b ""
+if [ -z "$SERVICE" ]; then
+  no "не смог определить имя сервиса"
+  b ""; d "  что вернул railway status:"; d "  ──────────────────────────────"
+  railway status 2>&1 | head -30
+  d "  ──────────────────────────────"
+  d "  Запустите:  railway link"
+  d "  и на шаге «Select a service» ВЫБЕРИТЕ сервис, не пропускайте через Esc."
+  d "  Либо укажите имя вручную:  bash scripts/deploy.sh ИМЯ-СЕРВИСА"
+  exit 1
+fi
+ok "сервис: $SERVICE"
+
+# ── Переменные ───────────────────────────────────────────────
+b ""; d "  переменные:"
+VARS="$(railway variables -s "$SERVICE" --kv 2>/dev/null)"
+[ -z "$VARS" ] && VARS="$(railway variables -s "$SERVICE" 2>/dev/null)"
+
+has(){ grep -qi "$1" <<<"$VARS" 2>/dev/null; }
+setv(){ railway variables --set "$1" -s "$SERVICE" --skip-deploys >/dev/null 2>&1 \
+     || railway variable set "$1" -s "$SERVICE" --skip-deploys >/dev/null 2>&1; }
+
+if has "DATABASE_URL"; then ok "DATABASE_URL задана"
+else
+  wa "DATABASE_URL нет — подключаю базу"
+  setv 'DATABASE_URL=${{Postgres.DATABASE_URL}}' \
+    && ok "DATABASE_URL проставлена" \
+    || no "не вышло. В панели: Variables → DATABASE_URL = \${{Postgres.DATABASE_URL}}"
+fi
+has "NEXT_PUBLIC_SITE_URL" && ok "NEXT_PUBLIC_SITE_URL задана" \
+  || { setv "NEXT_PUBLIC_SITE_URL=$URL_DEFAULT" && ok "NEXT_PUBLIC_SITE_URL проставлена"; }
+has "TELEGRAM_BOT_TOKEN" && ok "TELEGRAM_BOT_TOKEN задана" \
+  || wa "TELEGRAM_BOT_TOKEN нет — заказы в Telegram не уйдут"
+
+# ── Домен ────────────────────────────────────────────────────
+URL="$(railway domain -s "$SERVICE" --json 2>/dev/null | grep -oE '[a-z0-9.-]+\.up\.railway\.app' | head -1)"
+[ -z "$URL" ] && URL="$(railway domain list -s "$SERVICE" --json 2>/dev/null | grep -oE '[a-z0-9.-]+\.up\.railway\.app' | head -1)"
+URL="${URL:+https://$URL}"; URL="${URL:-$URL_DEFAULT}"
+ok "адрес: $URL"
+
+# ── Сборка ───────────────────────────────────────────────────
+b ""; b "  собираю (3–6 минут)"; b ""
 railway up -s "$SERVICE" -c 2>&1 | tee "$LOG"
 BUILD=${PIPESTATUS[0]}
 
-# ── 5. Итог ──────────────────────────────────────────────────
 b ""
 if [ "$BUILD" -ne 0 ]; then
   no "сборка не прошла"
-  b ""; d "  последние 40 строк — пришлите их в чат:"; d "  ──────────────────────────────────────────"
-  tail -40 "$LOG"
-  d "  ──────────────────────────────────────────"
-  d "  полный лог: $LOG"
+  b ""; d "  последние 40 строк — пришлите их в чат:"; d "  ──────────────────────────────"
+  tail -40 "$LOG"; d "  ──────────────────────────────"
   exit 1
 fi
 ok "сборка прошла"
 
 d "  жду, пока поднимется…"
+CODE=000
 for i in $(seq 1 30); do
   CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 "$URL/api/health" 2>/dev/null)"
-  [ "$CODE" = "200" ] && break
-  sleep 6
+  [ "$CODE" = "200" ] && break; sleep 6
 done
 
 b ""
-if [ "${CODE:-000}" = "200" ]; then
-  ok "сайт отвечает"
-  b ""; b "  $URL"; b ""
-  d "  здоровье:  $(curl -s --max-time 8 "$URL/api/health")"
+if [ "$CODE" = "200" ]; then
+  ok "сайт отвечает"; b ""; b "  $URL"; b ""
+  d "  здоровье: $(curl -s --max-time 8 "$URL/api/health")"
 else
-  no "сборка прошла, но сайт не отвечает (код ${CODE:-нет ответа})"
-  b ""; d "  логи запуска — пришлите их в чат:"; d "  ──────────────────────────────────────────"
+  no "сборка прошла, но сайт не отвечает (код $CODE)"
+  b ""; d "  логи запуска — пришлите их в чат:"; d "  ──────────────────────────────"
   railway logs -s "$SERVICE" 2>/dev/null | tail -40
-  d "  ──────────────────────────────────────────"
+  d "  ──────────────────────────────"
   exit 1
 fi
