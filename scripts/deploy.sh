@@ -28,19 +28,23 @@ SERVICE="${1:-}"
 STATUS_JSON="$(railway status --json 2>/dev/null)"
 
 if [ -z "$SERVICE" ]; then
-  SERVICE="$(node -e '
+  PAIR="$(node -e '
     let raw=""; process.stdin.on("data",c=>raw+=c).on("end",()=>{
-      let names=[];
+      let list=[];
       const walk=(o)=>{ if(!o||typeof o!=="object")return;
         if(Array.isArray(o))return o.forEach(walk);
-        if(typeof o.name==="string" && (o.id||o.serviceId)) names.push(o.name);
+        const id=o.id||o.serviceId;
+        if(typeof o.name==="string" && id) list.push(o.name+"\t"+id);
         Object.values(o).forEach(walk); };
       try{ walk(JSON.parse(raw)); }catch(e){}
       const bad=/postgres|mysql|redis|mongo|volume/i;
-      const app=[...new Set(names)].filter(n=>!bad.test(n));
+      const app=[...new Set(list)].filter(x=>!bad.test(x.split("\t")[0]));
       console.log(app[0]||"");
     });' <<<"$STATUS_JSON" 2>/dev/null)"
+  SERVICE="${PAIR%%$'\t'*}"
+  SERVICE_ID="${PAIR##*$'\t'}"
 fi
+SERVICE_ID="${SERVICE_ID:-}"
 
 if [ -z "$SERVICE" ]; then
   no "не смог определить имя сервиса"
@@ -52,20 +56,39 @@ if [ -z "$SERVICE" ]; then
   d "  Либо укажите имя вручную:  bash scripts/deploy.sh ИМЯ-СЕРВИСА"
   exit 1
 fi
-ok "сервис: $SERVICE"
+ok "сервис: $SERVICE${SERVICE_ID:+  (id $SERVICE_ID)}"
+
+# Привязываем сервис к папке. Без этого -s по имени не резолвится
+# и всё падает на «Service not found».
+if railway service link "$SERVICE" >/dev/null 2>&1 \
+   || railway service "$SERVICE" >/dev/null 2>&1 \
+   || { [ -n "$SERVICE_ID" ] && railway service link "$SERVICE_ID" >/dev/null 2>&1; }; then
+  ok "сервис привязан"
+  BOUND=1
+else
+  wa "привязать не вышло — попробую через -s"
+  BOUND=0
+fi
+
+# Команда с учётом привязки: привязан — без флага, иначе перебираем
+rw(){
+  local sub="$1"; shift
+  if [ "$BOUND" = "1" ]; then railway "$sub" "$@" && return 0; fi
+  railway "$sub" -s "$SERVICE" "$@" 2>/dev/null && return 0
+  [ -n "$SERVICE_ID" ] && railway "$sub" -s "$SERVICE_ID" "$@" 2>/dev/null && return 0
+  railway "$sub" "$@" 2>/dev/null
+}
 
 # ── Переменные ───────────────────────────────────────────────
 b ""; d "  переменные:"
-VARS="$(railway variables -s "$SERVICE" --kv 2>/dev/null)"
-[ -z "$VARS" ] && VARS="$(railway variables -s "$SERVICE" 2>/dev/null)"
+VARS="$(rw variables --kv 2>/dev/null)"
+[ -z "$VARS" ] && VARS="$(rw variables 2>/dev/null)"
 
 has(){ grep -qi "$1" <<<"$VARS" 2>/dev/null; }
 # Разные версии CLI понимают разный синтаксис, поэтому перебираем
 setv(){
-  railway variables --set "$1" -s "$SERVICE" >/dev/null 2>&1 && return 0
-  railway variable set "$1" -s "$SERVICE"    >/dev/null 2>&1 && return 0
-  railway variables --set "$1"               >/dev/null 2>&1 && return 0
-  railway variable set "$1"                  >/dev/null 2>&1 && return 0
+  rw variables --set "$1" >/dev/null 2>&1 && return 0
+  rw "variable" set "$1"  >/dev/null 2>&1 && return 0
   return 1
 }
 
@@ -85,19 +108,49 @@ else
 fi
 
 # ── Домен ────────────────────────────────────────────────────
-URL="$(railway domain -s "$SERVICE" --json 2>/dev/null | grep -oE '[a-z0-9.-]+\.up\.railway\.app' | head -1)"
-[ -z "$URL" ] && URL="$(railway domain list -s "$SERVICE" --json 2>/dev/null | grep -oE '[a-z0-9.-]+\.up\.railway\.app' | head -1)"
+URL="$(rw domain --json 2>/dev/null | grep -oE '[a-z0-9.-]+\.up\.railway\.app' | head -1)"
 URL="${URL:+https://$URL}"; URL="${URL:-$URL_DEFAULT}"
 ok "адрес: $URL"
 
 # ── Сборка ───────────────────────────────────────────────────
 b ""; b "  собираю (3–6 минут)"; b ""
-railway up -s "$SERVICE" -c 2>&1 | tee "$LOG"
+rw up -c 2>&1 | tee "$LOG"
 BUILD=${PIPESTATUS[0]}
 
 b ""
+# CLI не смог залить — не беда: автосборка с GitHub работает,
+# мой push её уже запустил. Просто дожидаемся результата.
+if [ "$BUILD" -ne 0 ] && grep -qi "service not found" "$LOG"; then
+  wa "CLI не смог залить напрямую"
+  d  "  но автосборка с GitHub работает — мой push её уже запустил"
+  b ""; d "  жду сборку на стороне Railway (до 8 минут)…"
+  CODE=000
+  for i in $(seq 1 48); do
+    CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 "$URL/api/health" 2>/dev/null)"
+    [ "$CODE" = "200" ] && break
+    printf "."; sleep 10
+  done
+  echo
+  if [ "$CODE" = "200" ]; then
+    BUILD=0
+  else
+    no "сайт так и не ответил"
+    b ""; d "  откройте Railway → relaxic → Deployments → Build Logs"
+    d "  и пришлите последние 40 строк"
+    exit 1
+  fi
+fi
+
 if [ "$BUILD" -ne 0 ]; then
   no "сборка не прошла"
+  if grep -qi "service not found" "$LOG"; then
+    b ""; d "  CLI не видит сервис. Что он показывает:"; d "  ──────────────────────────────"
+    railway service list 2>&1 | head -20
+    railway status 2>&1 | head -20
+    d "  ──────────────────────────────"
+    d "  Запустите:  railway link"
+    d "  и на шаге «Select a service» ВЫБЕРИТЕ relaxic, не жмите Esc."
+  fi
   b ""; d "  последние 40 строк — пришлите их в чат:"; d "  ──────────────────────────────"
   tail -40 "$LOG"; d "  ──────────────────────────────"
   exit 1
@@ -122,7 +175,7 @@ if [ "$CODE" = "200" ]; then
 else
   no "сборка прошла, но сайт не отвечает (код $CODE)"
   b ""; d "  логи запуска — пришлите их в чат:"; d "  ──────────────────────────────"
-  railway logs -s "$SERVICE" 2>/dev/null | tail -40
+  rw logs 2>/dev/null | tail -40
   d "  ──────────────────────────────"
   exit 1
 fi
