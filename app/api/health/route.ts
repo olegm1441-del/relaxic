@@ -10,9 +10,15 @@ export const dynamic = "force-dynamic";
  * не имея доступа к панели Railway.
  */
 export async function GET() {
+  // Railway подставляет SHA коммита при сборке из GitHub.
+  // По нему снаружи видно, доехала ли новая версия, — без этого
+  // «сайт отвечает» ничего не говорит о том, какая там сборка.
+  const sha = process.env.RAILWAY_GIT_COMMIT_SHA ?? "";
+
   const out: Record<string, unknown> = {
     ok: true,
     at: new Date().toISOString(),
+    commit: sha ? sha.slice(0, 7) : "локальная заливка",
   };
 
   if (!process.env.DATABASE_URL) {
