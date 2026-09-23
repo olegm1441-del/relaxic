@@ -1,12 +1,9 @@
 [build]
-  builder = "NIXPACKS"
-  # --include=dev обязателен: Railway ставит NODE_ENV=production,
-  # а без devDependencies не соберётся ни TypeScript, ни Tailwind
-  buildCommand = "npm ci --include=dev && npx prisma generate && npm run build"
+  builder = "DOCKERFILE"
+  dockerfilePath = "Dockerfile"
 
 [deploy]
-  # db push, а не migrate deploy: истории миграций ещё нет,
-  # migrate deploy на пустой папке migrations просто упадёт
+  # db push, а не migrate deploy: истории миграций ещё нет
   preDeployCommand = "npx prisma db push && npm run db:seed"
   startCommand = "npm run start"
   healthcheckPath = "/api/health"

@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [384, 640, 750, 828, 1080, 1200, 1440, 1920, 2200],
     imageSizes: [96, 128, 256, 384, 512, 640],
+    // Next 16 пускает только quality из белого списка, по умолчанию [75].
+    // Без этого <Image quality={85}> отдаёт 400 в продакшене.
+    qualities: [50, 60, 75, 85, 90],
     minimumCacheTTL: 60 * 60 * 24 * 365,
   },
   poweredByHeader: false,
