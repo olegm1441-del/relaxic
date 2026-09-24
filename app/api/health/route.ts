@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -10,15 +12,33 @@ export const dynamic = "force-dynamic";
  * не имея доступа к панели Railway.
  */
 export async function GET() {
-  // Railway подставляет SHA коммита при сборке из GitHub.
-  // По нему снаружи видно, доехала ли новая версия, — без этого
-  // «сайт отвечает» ничего не говорит о том, какая там сборка.
-  const sha = process.env.RAILWAY_GIT_COMMIT_SHA ?? "";
+  // Какая сборка на самом деле живёт на сайте.
+  //
+  // RAILWAY_GIT_COMMIT_SHA заполняется только при сборке из GitHub.
+  // Мы заливаем код напрямую через railway up, и эта переменная пустая —
+  // поэтому «сайт отвечает» само по себе ничего не говорило о версии.
+  // Отсюда приходилось гадать, доехали правки или нет.
+  //
+  // scripts/deploy.sh перед заливкой штампует сюда SHA, файл едет
+  // в образ вместе с public и читается на каждый запрос.
+  let commit = process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) ?? "";
+  let builtAt = "";
+  if (!commit) {
+    try {
+      const raw = await readFile(path.join(process.cwd(), "public", "build.json"), "utf8");
+      const stamp = JSON.parse(raw) as { commit?: string; at?: string };
+      commit = stamp.commit ?? "";
+      builtAt = stamp.at ?? "";
+    } catch {
+      // Штампа нет — значит заливали руками, мимо deploy.sh
+    }
+  }
 
   const out: Record<string, unknown> = {
     ok: true,
     at: new Date().toISOString(),
-    commit: sha ? sha.slice(0, 7) : "локальная заливка",
+    commit: commit && commit !== "—" ? commit : "без штампа",
+    builtAt: builtAt && builtAt !== "—" ? builtAt : undefined,
   };
 
   if (!process.env.DATABASE_URL) {
