@@ -34,6 +34,8 @@ export interface Artwork {
   fandom: string;
   techniques: TechniqueKey[];
   base: { difficulty: number; hours: number; colors: number; minAge: number };
+  /** Сколько кадров у сюжета в public/img/product. По умолчанию три. */
+  shots?: number;
   hit?: boolean;
   lead: string;
   story: string;
