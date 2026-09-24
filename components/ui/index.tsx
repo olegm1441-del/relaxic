@@ -20,7 +20,10 @@ export function SectionHead({
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4 lg:mb-12">
       <div>
-        {no && <span className="paint-no block text-[var(--accent)]">№ {no}</span>}
+        {/* Номер секции больше не красный: Сурик по бренд-буку это кнопки,
+            цена и активное состояние, а не декор. Приём «палитра как набор
+            красок» держится нумерацией, а не цветом. */}
+        {no && <span className="paint-no block text-[var(--text-muted)]">№ {no}</span>}
         <h2 className="h2 mt-2">{title}</h2>
         {lead && <p className="measure mt-3 text-[var(--text-muted)]">{lead}</p>}
       </div>

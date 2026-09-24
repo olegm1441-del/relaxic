@@ -45,7 +45,7 @@ export default function HowItWorksPage() {
             <div className="p-5">
               <h2 className="h3 text-[var(--text)]">{t.title}</h2>
               <p className="mt-2 text-[0.9375rem] leading-relaxed text-[var(--text-muted)]">{t.lead}</p>
-              <p className="mt-4 text-[0.8125rem] text-[var(--accent)]">Разбор техники →</p>
+              <p className="mt-4 text-[0.8125rem] text-[var(--text-muted)]">Разбор техники →</p>
             </div>
           </Link>
         ))}

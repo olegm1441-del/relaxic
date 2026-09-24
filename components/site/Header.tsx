@@ -54,6 +54,7 @@ export function Header({ techniques }: { techniques: MenuTechnique[] }) {
   }, [mobile]);
 
   return (
+    <>
     <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[color-mix(in_oklab,var(--bg)_88%,transparent)] backdrop-blur-md">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded focus:bg-[var(--accent)] focus:px-4 focus:py-2 focus:text-[var(--accent-contrast)]">
         К содержанию
@@ -115,7 +116,7 @@ export function Header({ techniques }: { techniques: MenuTechnique[] }) {
                   <div className="my-2 h-px bg-[var(--border)]" />
                   <Link
                     href="/fandom"
-                    className="block rounded-[var(--radius-ui)] px-3 py-2 text-sm text-[var(--accent)] no-underline hover:bg-[var(--surface-2)]"
+                    className="block rounded-[var(--radius-ui)] px-3 py-2 text-sm text-[var(--text)] no-underline hover:bg-[var(--surface-2)]"
                   >
                     Все вселенные
                   </Link>
@@ -160,7 +161,14 @@ export function Header({ techniques }: { techniques: MenuTechnique[] }) {
         </div>
       </div>
 
-      {/* ── Мобильное меню ── */}
+    </header>
+
+      {/* ── Мобильное меню ──
+           Живёт СНАРУЖИ <header> намеренно. На шапке стоит backdrop-blur,
+           а backdrop-filter создаёт containing block для position:fixed —
+           панель отсчитывала top-16 и bottom-0 от шапки высотой 65px
+           и схлопывалась в полосу высотой один пиксель. Меню открывалось,
+           но показывать ему было нечего. */}
       {mobile && (
         <div className="fixed inset-x-0 bottom-0 top-16 z-50 overflow-y-auto overscroll-contain border-t border-[var(--border)] bg-[var(--bg)] xl:hidden">
           <nav className="container-x py-4" aria-label="Мобильное меню">
@@ -220,6 +228,7 @@ export function Header({ techniques }: { techniques: MenuTechnique[] }) {
           </nav>
         </div>
       )}
-    </header>
+
+    </>
   );
 }

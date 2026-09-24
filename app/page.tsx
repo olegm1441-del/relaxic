@@ -197,7 +197,7 @@ export default function Home() {
               href="/fandom"
               className="card card-lift flex aspect-[3/4] flex-col items-center justify-center gap-2 p-4 text-center no-underline"
             >
-              <Sparkles size={22} className="text-[var(--accent)]" />
+              <Sparkles size={22} className="text-[var(--text-muted)]" />
               <span className="text-[0.9375rem] font-semibold text-[var(--text)]">Все вселенные</span>
               <span className="text-[0.75rem] text-[var(--text-muted)]">и наборы на заказ</span>
             </Link>
@@ -219,7 +219,7 @@ export default function Home() {
               const I = Icon as typeof Clock;
               return (
                 <div key={title as string} className="card p-5">
-                  <I size={22} className="text-[var(--accent)]" />
+                  <I size={22} className="text-[var(--text-muted)]" />
                   <h3 className="mt-4 font-semibold">{title as string}</h3>
                   <p className="mt-2 text-[0.9375rem] leading-relaxed text-[var(--text-muted)]">{text as string}</p>
                 </div>

@@ -67,7 +67,7 @@ export default async function FandomPage({ params }: { params: Promise<{ slug: s
         </div>
         <Container className="relative -mt-28 pb-2 lg:-mt-36">
           <div className="max-w-[46rem]">
-            <p className="caption text-[var(--accent)]">Вселенная</p>
+            <p className="caption text-[var(--text-muted)]">Вселенная</p>
             <h1 className="h1 mt-3">{fandom.title}</h1>
             <Brush className="mt-5" />
             <p className="measure mt-5 text-[1.0625rem] leading-relaxed text-[var(--text)]">

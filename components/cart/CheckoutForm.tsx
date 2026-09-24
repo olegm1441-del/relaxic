@@ -82,7 +82,7 @@ export function CheckoutForm() {
     <form onSubmit={onSubmit} className="grid gap-8 lg:grid-cols-[1fr_360px] lg:gap-12">
       <div>
         <div className="mb-6 flex gap-3 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface-2)] p-4">
-          <Info size={18} className="mt-0.5 shrink-0 text-[var(--accent)]" />
+          <Info size={18} className="mt-0.5 shrink-0 text-[var(--text-muted)]" />
           <p className="text-[0.875rem] leading-relaxed">
             <span className="font-semibold">Демонстрационный режим.</span> Оплата на сайте не проводится:
             заказ сохраняется, менеджер связывается по телефону и подтверждает состав и доставку.

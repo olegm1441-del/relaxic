@@ -68,7 +68,7 @@ export default function FaqPage() {
       <div className="space-y-10">
         {GROUPS.map(([group, items]) => (
           <section key={group}>
-            <h2 className="caption text-[var(--accent)]">{group}</h2>
+            <h2 className="caption text-[var(--text-muted)]">{group}</h2>
             <dl className="mt-4 divide-y divide-[var(--border)] border-y border-[var(--border)]">
               {items.map(([q, a]) => (
                 <div key={q} className="py-5">

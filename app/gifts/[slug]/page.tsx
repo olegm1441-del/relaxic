@@ -42,7 +42,7 @@ export default async function GiftCollectionPage({ params }: { params: Promise<{
 
       <header className="mb-10 grid gap-8 lg:mb-14 lg:grid-cols-[1fr_minmax(0,42%)] lg:items-center lg:gap-12">
         <div>
-          <p className="caption text-[var(--accent)]">Подарки</p>
+          <p className="caption text-[var(--text-muted)]">Подарки</p>
           <h1 className="h1 mt-3">{c.title}</h1>
           <Brush className="mt-5" />
           <p className="measure mt-5 text-[1.0625rem] leading-relaxed text-[var(--text-muted)]">{c.body}</p>

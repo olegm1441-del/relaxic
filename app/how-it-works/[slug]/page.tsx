@@ -58,7 +58,7 @@ export default async function HowtoPage({ params }: { params: Promise<{ slug: st
       <Container className="pb-16">
         <header className="mb-12 grid gap-8 lg:grid-cols-[1fr_minmax(0,44%)] lg:items-center lg:gap-12">
           <div>
-            <p className="caption text-[var(--accent)]">Разбор техники</p>
+            <p className="caption text-[var(--text-muted)]">Разбор техники</p>
             <h1 className="h1 mt-3">{tech.one}</h1>
             <Brush className="mt-5" />
             <p className="measure mt-5 text-[1.0625rem] leading-relaxed text-[var(--text-muted)]">{tech.lead}</p>

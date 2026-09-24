@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Unbounded, Onest } from "next/font/google";
+import { Rubik, Onest } from "next/font/google";
 import "./globals.css";
 
 import { Header, type MenuTechnique } from "@/components/site/Header";
@@ -10,15 +10,23 @@ import { CartDrawer } from "@/components/cart/CartDrawer";
 import { TECHNIQUES, fandomsForTechnique } from "@/lib/catalog";
 import { COMPANY } from "@/lib/company";
 
-const unbounded = Unbounded({
-  subsets: ["cyrillic", "latin"],
-  weight: ["400", "600", "700", "800"],
-  variable: "--font-unbounded",
+/**
+ * Rubik вместо Unbounded.
+ *
+ * Unbounded — широкий техно-гротеск, и с логотипом он не в родстве:
+ * в знаке округлый геометрический шрифт со скруглёнными окончаниями штрихов.
+ * Заголовки спорили с собственным логотипом в шапке. Rubik — та же порода:
+ * геометрия со скруглёнными углами, рисованная кириллица.
+ */
+const display = Rubik({
+  subsets: ["cyrillic", "cyrillic-ext", "latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-display-src",
   display: "swap",
 });
 
 const onest = Onest({
-  subsets: ["cyrillic", "latin"],
+  subsets: ["cyrillic", "cyrillic-ext", "latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-onest",
   display: "swap",
@@ -77,7 +85,7 @@ const organizationLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${unbounded.variable} ${onest.variable}`}>
+    <html lang="ru" className={`${display.variable} ${onest.variable}`}>
       <body className="flex min-h-[100dvh] flex-col">
         <Header techniques={buildMenu()} />
         <main id="main" className="flex-1">{children}</main>

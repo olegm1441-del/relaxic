@@ -79,7 +79,7 @@ export function Quiz({ products }: { products: Product[] }) {
 
     return (
       <div>
-        <p className="caption text-[var(--accent)]">Готово</p>
+        <p className="caption text-[var(--text-muted)]">Готово</p>
         <h1 className="h1 mt-3">
           {result.length > 0 ? "Вот что подойдёт" : "Под такие условия пока ничего нет"}
         </h1>

@@ -25,8 +25,10 @@
   --color-mint:       #C9F2EF;
   --color-sky:        #CAE8F7;
 
-  --font-display: "Unbounded", system-ui, sans-serif;
-  --font-text:    "Onest", system-ui, sans-serif;
+  /* Rubik ведёт голос бренда — он одной породы с логотипом.
+     Onest везёт читаемость: кириллица-first, держит мелкий кегль. */
+  --font-display: var(--font-display-src), system-ui, sans-serif;
+  --font-text:    var(--font-onest), system-ui, sans-serif;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in:  cubic-bezier(0.4, 0, 1, 1);
@@ -49,6 +51,7 @@
   /* Уголь, а не белый: 4,83:1 против 3,89:1. Бренд-бук, раздел 3. */
   --accent-contrast: var(--color-ink);
   --shadow-card: 0 18px 40px -24px rgb(0 0 0 / 0.85);
+  --weave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cg stroke='%23F6F1E8' stroke-opacity='0.035' stroke-width='1.1' stroke-linecap='round'%3E%3Cpath d='M6 6 L16 16 M16 6 L6 16'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* Светлая рабочая поверхность: корзина, чекаут, фильтры */
@@ -62,6 +65,8 @@
   --accent-2: var(--color-amethyst-d);
   --accent-contrast: var(--color-ink);
   --shadow-card: 0 18px 40px -28px rgb(20 17 16 / 0.35);
+  /* На Холсте нить тёмная, иначе узора не видно вовсе */
+  --weave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cg stroke='%23141110' stroke-opacity='0.05' stroke-width='1.1' stroke-linecap='round'%3E%3Cpath d='M6 6 L16 16 M16 6 L6 16'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* Слои каскада: утилиты Tailwind должны побеждать мои классы.
@@ -77,9 +82,18 @@
     scroll-padding-top: 88px;
   }
 
+  /* Фон — счётный крестик.
+     Раньше поверх Угля лежала фотография холста, и на тёмном она читалась
+     как серая плитка. Здесь узор нарисован вектором: сетка крестиков,
+     как на канве Aida, и та же X, что в знаке. Бесшовный по построению,
+     весит несколько сотен байт и остаётся резким на любом экране.
+     Прозрачность на пределе различимости: фактура чувствуется,
+     но не спорит с товаром. */
   body {
     margin: 0;
-    background: var(--bg);
+    background-color: var(--bg);
+    background-image: var(--weave);
+    background-size: 22px 22px;
     color: var(--text);
     font-family: var(--font-text);
     font-synthesis-weight: none;

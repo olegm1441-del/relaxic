@@ -55,7 +55,7 @@ export default function BlogHub() {
           <Image src={lead.cover} alt="" fill priority sizes="(max-width: 1024px) 100vw, 52vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
         </div>
         <div className="flex flex-1 flex-col justify-center p-6 lg:p-10">
-          <p className="caption text-[var(--accent)]">
+          <p className="caption text-[var(--text-muted)]">
             {ARTICLE_CATEGORIES.find((c) => c.key === lead.category)?.title}
           </p>
           <h3 className="h2 mt-3 text-[var(--text)]">{lead.title}</h3>

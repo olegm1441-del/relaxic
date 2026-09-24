@@ -28,7 +28,7 @@ export default function GiftsPage() {
         </div>
         <Container className="relative -mt-24 lg:-mt-28">
           <div className="max-w-[44rem]">
-            <p className="caption text-[var(--accent)]">Подарки</p>
+            <p className="caption text-[var(--text-muted)]">Подарки</p>
             <h1 className="h1 mt-3">Подарок, который закончат</h1>
             <p className="measure mt-5 text-[1.0625rem] leading-relaxed">
               Незаконченный набор работает против дарителя: он лежит в шкафу и напоминает

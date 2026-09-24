@@ -82,7 +82,7 @@ export default async function BlogEntry({ params }: { params: Promise<{ slug: st
 
       <Container className="pb-16">
         <article className="mx-auto max-w-[760px]">
-          <p className="caption text-[var(--accent)]">{category?.title}</p>
+          <p className="caption text-[var(--text-muted)]">{category?.title}</p>
           <h1 className="h1 mt-4">{article.title}</h1>
           <p className="mt-4 text-sm text-[var(--text-muted)]">{article.readMinutes} мин чтения</p>
           <Brush className="mt-6" />
@@ -149,7 +149,7 @@ function CategoryPage({ slug }: { slug: string }) {
 
       <header className="mb-10 grid gap-6 lg:grid-cols-[1fr_minmax(0,40%)] lg:items-center lg:gap-12">
         <div>
-          <p className="caption text-[var(--accent)]">Рубрика</p>
+          <p className="caption text-[var(--text-muted)]">Рубрика</p>
           <h1 className="h1 mt-3">{cat.title}</h1>
           <p className="measure mt-4 text-[1.0625rem] text-[var(--text-muted)]">{cat.lead}</p>
           <p className="mt-4 text-sm text-[var(--text-muted)]">
