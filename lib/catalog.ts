@@ -129,13 +129,18 @@ export function difficultyLabel(n: number): string {
 
 /** Быстрые входы в каталог — по задаче, а не по свойству товара.
  *  Люди приходят с «чем занять вечер» и «что подарить», а не с «сложность 2». */
-export const QUICK_ENTRIES: { title: string; note: string; href: string }[] = [
+export const QUICK_ENTRIES: {
+  title: string; note: string; href: string;
+  /** Подбор — не сокращение фильтра, а другой путь. Отмечаем цветом, чтобы
+   *  он не терялся в ряду одинаковых серых чипсов. */
+  accent?: boolean;
+}[] = [
   { title: "На один вечер", note: "до 5 часов", href: "/catalog?hours=0-5" },
   { title: "Первый набор", note: "сложность 1–2", href: "/catalog?difficulty=1,2" },
   { title: "Детям", note: "от 6 лет", href: "/catalog?age=6" },
   { title: "В подарок", note: "то, что закончат", href: "/gifts" },
   { title: "Вызов на месяц", note: "от 30 часов", href: "/catalog?hours=30%2B" },
-  { title: "Подобрать за 3 вопроса", note: "40 секунд", href: "/quiz" },
+  { title: "Подобрать за 3 вопроса", note: "40 секунд", href: "/quiz", accent: true },
 ];
 
 // ── Цена и размеры ───────────────────────────────────────────

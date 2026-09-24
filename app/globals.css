@@ -178,7 +178,28 @@
   .btn-secondary { background: transparent; color: var(--text); border-color: var(--border); }
   .btn-secondary:hover:not(:disabled) { border-color: var(--text-muted); background: color-mix(in oklab, var(--text) 5%, transparent); }
 
-  .btn-ghost { background: transparent; color: var(--text-muted); padding-inline: 12px; }
+  /* Второй путь развилки: «не знаю, что выбрать» → подбор за три вопроса.
+   Это один из главных конвертеров, и серым контуром он не читался как действие.
+   Аметист — второй акцент бренд-бука и цвет холодного мазка в самом знаке.
+   Уголь на нём даёт 6,11:1 — выше, чем 4,83:1 у суриковой primary.
+   Рядом с оранжевой кнопкой это читается как две равные двери, а не как
+   вторая по важности: развилка в пути клиента именно такая. */
+.btn-accent-2 {
+  background: var(--color-amethyst);
+  color: var(--color-ink);
+  border-color: var(--color-amethyst);
+}
+.btn-accent-2:hover:not(:disabled) { background: #AE9AE0; border-color: #AE9AE0; }
+/* На светлых поверхностях светлый Аметист даёт 2,73:1 и не проходит —
+   там работает затемнённый двойник с выворотом. */
+[data-surface="light"] .btn-accent-2 {
+  background: var(--color-amethyst-d);
+  border-color: var(--color-amethyst-d);
+  color: #FFFFFF;
+}
+[data-surface="light"] .btn-accent-2:hover:not(:disabled) { background: #6844C4; border-color: #6844C4; }
+
+.btn-ghost { background: transparent; color: var(--text-muted); padding-inline: 12px; }
   .btn-ghost:hover:not(:disabled) { color: var(--text); }
 
   .btn-sm { min-height: 40px; padding-inline: 16px; font-size: 0.875rem; }

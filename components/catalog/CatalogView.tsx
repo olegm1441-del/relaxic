@@ -92,7 +92,7 @@ export function CatalogView({
             title="Под эти фильтры ничего нет"
             lead="Снимите пару условий или подберите набор по трём вопросам — это быстрее."
           >
-            <Link href="/quiz" className="btn btn-primary btn-sm">Подобрать за 3 шага</Link>
+            <Link href="/quiz" className="btn btn-accent-2 btn-sm">Подобрать за 3 шага</Link>
             <Link href="/catalog" className="btn btn-secondary btn-sm">Весь каталог</Link>
           </Empty>
         )}

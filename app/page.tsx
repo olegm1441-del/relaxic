@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Gift, Package, Sparkles, Truck } from "lucide-react";
+import { ArrowRight, Clock, Gift, Package, Sparkles, Truck } from "lucide-react";
 import { Brush, Container, SectionHead } from "@/components/ui";
 import { ProductGrid } from "@/components/catalog/ProductCard";
 import { QuickEntries } from "@/components/catalog/QuickEntries";
@@ -31,8 +31,10 @@ export default function Home() {
       <section className="relative border-b border-[var(--border)]">
         <div className="grid lg:grid-cols-2">
           <div className="relative order-first aspect-[5/4] min-[480px]:aspect-[16/10] lg:order-last lg:aspect-auto lg:min-h-[600px]">
+            {/* Единственный файл первого экрана: заменить фон — положить сюда
+                новый кадр под тем же именем, править код не нужно. */}
             <Image
-              src="/img/mood/finished-wall.jpg"
+              src="/img/hero/hero-main.jpg"
               alt="Собранные наборы Relaxic в интерьере"
               fill
               priority
@@ -56,8 +58,13 @@ export default function Home() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/catalog" className="btn btn-primary">Смотреть каталог</Link>
-                <Link href="/quiz" className="btn btn-secondary">Подобрать за 3 вопроса</Link>
+                <Link href="/quiz" className="btn btn-accent-2">Подобрать за 3 вопроса</Link>
               </div>
+              {/* Развилка названа словами: две кнопки без подписи читаются
+                  как два разных действия, а не как выбор одного из двух путей. */}
+              <p className="mt-3.5 text-[0.8125rem] text-[var(--text-muted)]">
+                Знаете вселенную — в каталог. Не знаете — три вопроса и 40 секунд.
+              </p>
               <dl className="mt-10 grid grid-cols-3 gap-4 text-sm">
                 {[
                   [String(PRODUCTS.length), "наборов в трёх техниках"],
@@ -138,9 +145,15 @@ export default function Home() {
                   </p>
                   <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.8125rem] text-[var(--text-muted)]">
                     <span className="tnum">{productsWord(PRODUCTS.filter((p) => p.technique === t.key).length)}</span>
-                    <span>·</span>
-                    <span>освоить за {t.learnMinutes} мин</span>
+                    <span aria-hidden className="opacity-40">·</span>
+                    <span>{t.forWhom.toLowerCase()}</span>
                   </p>
+                  {/* Явное действие в каждой карточке: путь по технике должен
+                      заканчиваться кнопкой, а не догадкой, что плитка кликабельна. */}
+                  <span className="btn btn-card btn-sm mt-5 w-full">
+                    Смотреть {t.short}
+                    <ArrowRight size={15} />
+                  </span>
                 </div>
               </Link>
             ))}

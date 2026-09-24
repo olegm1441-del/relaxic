@@ -66,7 +66,7 @@ export default async function HowtoPage({ params }: { params: Promise<{ slug: st
               <Link href={`/catalog/${tech.slug}`} className="btn btn-primary">
                 Наборы: {tech.title.toLowerCase()}
               </Link>
-              <Link href="/quiz" className="btn btn-secondary">Подобрать за 3 вопроса</Link>
+              <Link href="/quiz" className="btn btn-accent-2">Подобрать за 3 вопроса</Link>
             </div>
           </div>
           <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-blk)] bg-[var(--color-canvas-2)]">

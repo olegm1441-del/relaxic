@@ -34,7 +34,7 @@ export function CartPageView({ topUp }: { topUp: Product[] }) {
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           <Link href="/catalog" className="btn btn-primary">В каталог</Link>
-          <Link href="/quiz" className="btn btn-secondary">Подобрать за 3 шага</Link>
+          <Link href="/quiz" className="btn btn-accent-2">Подобрать за 3 шага</Link>
         </div>
       </div>
     );

@@ -24,9 +24,15 @@ export function QuickEntries({
           <li key={e.href}>
             <Link
               href={e.href}
-              className="group inline-flex items-baseline gap-2 rounded-[var(--radius-ui)] border border-[var(--border)] px-3.5 py-2.5 text-sm no-underline transition-colors hover:border-[var(--accent)] hover:bg-[color-mix(in_oklab,var(--accent)_10%,transparent)]"
+              className={`group inline-flex items-baseline gap-2 rounded-[var(--radius-ui)] border px-3.5 py-2.5 text-sm no-underline transition-colors ${
+                e.accent
+                  ? "border-[color-mix(in_oklab,var(--accent-2)_55%,transparent)] bg-[color-mix(in_oklab,var(--accent-2)_12%,transparent)] hover:bg-[color-mix(in_oklab,var(--accent-2)_22%,transparent)]"
+                  : "border-[var(--border)] hover:border-[var(--accent)] hover:bg-[color-mix(in_oklab,var(--accent)_10%,transparent)]"
+              }`}
             >
-              <span className="font-semibold text-[var(--text)]">{e.title}</span>
+              <span className={`font-semibold ${e.accent ? "text-[var(--accent-2)]" : "text-[var(--text)]"}`}>
+                {e.title}
+              </span>
               <span className="text-[0.75rem] text-[var(--text-muted)]">{e.note}</span>
             </Link>
           </li>

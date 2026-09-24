@@ -72,7 +72,7 @@ export function CartDrawer() {
             <p className="text-[var(--text-muted)]">Пока пусто. Начните с техники или вселенной.</p>
             <div className="flex flex-wrap justify-center gap-2">
               <Link href="/catalog" className="btn btn-primary btn-sm" onClick={() => setOpen(false)}>В каталог</Link>
-              <Link href="/quiz" className="btn btn-secondary btn-sm" onClick={() => setOpen(false)}>Подобрать за 3 шага</Link>
+              <Link href="/quiz" className="btn btn-accent-2 btn-sm" onClick={() => setOpen(false)}>Подобрать за 3 шага</Link>
             </div>
           </div>
         ) : (
