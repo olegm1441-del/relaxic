@@ -34,6 +34,7 @@ export function CookieBar() {
   const [expanded, setExpanded] = useState(false);
   const [analytics, setAnalytics] = useState(true);
   const [marketing, setMarketing] = useState(false);
+  const [liftBy, setLiftBy] = useState(0);
 
   useEffect(() => {
     // 1,2 с: панель не должна встречать человека на входе
@@ -42,6 +43,22 @@ export function CookieBar() {
     window.addEventListener(REOPEN, onReopen);
     return () => { clearTimeout(t); window.removeEventListener(REOPEN, onReopen); };
   }, []);
+
+  /**
+   * На карточке товара снизу висит кнопка «В корзину», и панель cookie
+   * ложилась прямо на неё: на первом визите главное действие страницы
+   * было недоступно. Поднимаемся на высоту этой панели.
+   */
+  useEffect(() => {
+    if (!show) return;
+    const measure = () => {
+      const bar = document.querySelector<HTMLElement>("[data-bottom-bar]");
+      setLiftBy(bar && getComputedStyle(bar).display !== "none" ? bar.offsetHeight : 0);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [show]);
 
   function save(a: boolean, m: boolean) {
     try {
@@ -60,11 +77,13 @@ export function CookieBar() {
     <div
       role="region"
       aria-label="Файлы cookie"
-      className="fixed inset-x-0 bottom-0 z-[60] p-3 sm:p-4"
-      style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}
+      // Обёртка растянута на всю ширину, и её прозрачные поля перехватывали
+      // нажатия по липкой кнопке «В корзину». Клики ловит только сама карточка.
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] p-3 sm:p-4"
+      style={{ paddingBottom: `calc(max(12px, env(safe-area-inset-bottom)) + ${liftBy}px)` }}
     >
       <div className="rise container-x">
-        <div className="card mx-auto max-w-[1000px] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] sm:p-5">
+        <div className="card pointer-events-auto mx-auto max-w-[1000px] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)] sm:p-5">
           <p className="measure text-sm leading-relaxed text-[var(--text)]">
             Мы используем cookie, чтобы сайт помнил корзину и мы понимали, что вам интересно.
             Подробнее — в{" "}

@@ -102,6 +102,7 @@ export function ProductBuy({
 
       {/* Мобильная липкая панель: кнопка всегда под большим пальцем */}
       <div
+        data-bottom-bar
         className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[color-mix(in_oklab,var(--bg)_94%,transparent)] px-4 py-3 backdrop-blur-md lg:hidden"
         style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom))" }}
       >
