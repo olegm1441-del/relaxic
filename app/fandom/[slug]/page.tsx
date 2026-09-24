@@ -73,11 +73,6 @@ export default async function FandomPage({ params }: { params: Promise<{ slug: s
             <p className="measure mt-5 text-[1.0625rem] leading-relaxed text-[var(--text)]">
               {fandom.description}
             </p>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {fandom.tags.map((t) => (
-                <span key={t} className="chip cursor-default">{t}</span>
-              ))}
-            </div>
           </div>
         </Container>
       </section>
