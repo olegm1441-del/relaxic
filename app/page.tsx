@@ -22,50 +22,58 @@ export default function Home() {
 
   return (
     <>
-      {/* ── Hero ──
-           Ни текстуры, ни цветного свечения: фон — чистый Уголь, всё внимание
-           на кадр. Картинка стоит первой и на узких экранах тоже — иначе
-           первый экран превращается в серое поле с текстом.
-           Текст прижат вправо в своей половине: его левый край совпадает
-           с колонкой контейнера на любой ширине, от 1280 до 2560. */}
-      <section className="relative border-b border-[var(--border)]">
-        <div className="grid lg:grid-cols-2">
-          <div className="relative order-first aspect-[5/4] min-[480px]:aspect-[16/10] lg:order-last lg:aspect-auto lg:min-h-[600px]">
-            {/* Единственный файл первого экрана: заменить фон — положить сюда
-                новый кадр под тем же именем, править код не нужно. */}
-            <Image
-              src="/img/hero/hero-main.jpg"
-              alt="Собранные наборы Relaxic в интерьере"
-              fill
-              priority
-              quality={85}
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-            />
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[rgb(20_17_16/0.12)] to-transparent lg:bg-[linear-gradient(to_right,var(--bg)_0%,rgb(20_17_16/0.35)_14%,transparent_38%)]"
-            />
-          </div>
+      {/* ── Первый экран ──
+           Кадр — фон всей секции, а не отдельная плитка сверху. Раньше до
+           1024px картинка занимала экран целиком, а оффер с кнопками уезжал
+           под сгиб: человек открывал сайт и видел фотографию, больше ничего.
+           Теперь текст лежит на кадре при любой ширине; от 1024px фотография
+           отступает на правую половину и освобождает колонку под текст.
+           Колонка живёт внутри container-x — заголовок встаёт на ту же
+           вертикаль, что и заголовки секций ниже, а середина контейнера
+           всегда совпадает с серединой экрана, поэтому шов с кадром ровный. */}
+      <section className="relative isolate overflow-hidden border-b border-[var(--border)]">
+        <div aria-hidden className="absolute inset-0 -z-10 lg:left-1/2">
+          {/* Единственный файл первого экрана: заменить фон — положить сюда
+              новый кадр под тем же именем, править код не нужно. */}
+          <Image
+            src="/img/hero/hero-main.jpg"
+            alt=""
+            fill
+            priority
+            quality={85}
+            sizes="100vw"
+            className="object-cover object-[56%_44%] lg:object-center"
+          />
+          {/* До 1024px текст лежит на кадре, поэтому гасим по диагонали:
+              густо в левом верхнем углу, где текст, и почти прозрачно справа
+              внизу — иначе фотография превращается в чёрное поле. Отдельным
+              слоем гасим низ, чтобы секция без шва переходила в следующую. */}
+          <div className="absolute inset-0 bg-[linear-gradient(104deg,rgb(20_17_16/0.95)_0%,rgb(20_17_16/0.90)_34%,rgb(20_17_16/0.62)_66%,rgb(20_17_16/0.36)_100%)] lg:hidden" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_top,var(--bg)_0%,rgb(20_17_16/0)_32%)] lg:hidden" />
+          <div className="absolute inset-0 hidden lg:block bg-[linear-gradient(to_right,var(--bg)_0%,rgb(20_17_16/0.62)_17%,rgb(20_17_16/0.14)_45%,transparent_66%)]" />
+        </div>
 
-          <div className="flex items-center">
-            <div className="ml-auto w-full max-w-[640px] px-4 pb-14 pt-8 sm:px-6 lg:py-24 lg:pr-12">
-              <h1 className="display max-w-[14ch]">Соберите свою вселенную</h1>
-              <p className="measure mt-6 text-[1.0625rem] leading-relaxed text-[var(--text-muted)] lg:text-[1.1875rem]">
+        <Container>
+          <div className="grid lg:grid-cols-2">
+            {/* До 1024px колонка уже контейнера: длинная строка плохо читается,
+                а правая треть остаётся под открытый кадр. */}
+            <div className="relative flex min-h-[min(78svh,35rem)] max-w-[34rem] flex-col justify-center py-12 lg:min-h-[34rem] lg:max-w-none lg:py-24 lg:pr-12">
+              <h1 className="display max-w-[15ch]">Соберите свою вселенную</h1>
+              <p className="measure mt-5 text-[1.0625rem] leading-relaxed text-[rgb(246_241_232/0.80)] lg:mt-6 lg:text-[1.1875rem]">
                 Картины по номерам, алмазные мозаики и вышивка по кадрам из кино,
-                сериалов и игр. У каждого набора честно указаны сложность и время
-                сборки — в часах, а не «за вечер».
+                сериалов и игр. У каждого набора указаны сложность и время сборки
+                в часах.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-7 flex flex-wrap gap-3">
                 <Link href="/catalog" className="btn btn-primary">Смотреть каталог</Link>
                 <Link href="/quiz" className="btn btn-accent-2">Подобрать за 3 вопроса</Link>
               </div>
               {/* Развилка названа словами: две кнопки без подписи читаются
                   как два разных действия, а не как выбор одного из двух путей. */}
-              <p className="mt-3.5 text-[0.8125rem] text-[var(--text-muted)]">
+              <p className="mt-3.5 text-[0.8125rem] text-[rgb(246_241_232/0.64)]">
                 Знаете вселенную — в каталог. Не знаете — три вопроса и 40 секунд.
               </p>
-              <dl className="mt-10 grid grid-cols-3 gap-4 text-sm">
+              <dl className="mt-8 grid grid-cols-3 gap-4 text-sm lg:mt-10">
                 {[
                   [String(PRODUCTS.length), "наборов в трёх техниках"],
                   [String(FANDOMS.length), "вселенных"],
@@ -73,13 +81,13 @@ export default function Home() {
                 ].map(([n, t]) => (
                   <div key={t}>
                     <dt className="tnum text-[1.375rem] font-bold leading-none lg:text-[1.5rem]">{n}</dt>
-                    <dd className="mt-1.5 text-[0.8125rem] leading-snug text-[var(--text-muted)] lg:text-sm">{t}</dd>
+                    <dd className="mt-1.5 text-[0.8125rem] leading-snug text-[rgb(246_241_232/0.64)] lg:text-sm">{t}</dd>
                   </div>
                 ))}
               </dl>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* ── Хиты ── */}
@@ -108,7 +116,7 @@ export default function Home() {
             href="/catalog"
             hrefLabel="Весь каталог"
           />
-          <QuickEntries withHeading={false} />
+          <QuickEntries withHeading={false} variant="tiles" />
         </Container>
       </section>
 
@@ -211,9 +219,9 @@ export default function Home() {
           <SectionHead no="05" title="Почему у нас" lead="Четыре вещи, которых обычно не хватает, когда выбираешь набор." />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              [Clock, "Честное время", "Не «за вечер», а в часах. 18 часов — это неделя по два вечера, и мы так и пишем."],
+              [Clock, "Честное время", "Время сборки указано в часах. 18 часов — это неделя по два вечера, и мы так и пишем."],
               [Package, "Видно, что в коробке", "Состав с фотографией комплектации, плотность холста и тип страз — до покупки."],
-              [Truck, "Доставка по всей России", `СДЭК, Яндекс и Почта. От ${price(COMPANY.freeDeliveryFrom)} — бесплатно.`],
+              [Truck, "Доставка по РФ", `СДЭК, Яндекс и Почта. От ${price(COMPANY.freeDeliveryFrom)} — бесплатно.`],
               [Gift, "Подарок, который закончат", "Подбираем по человеку, а не по картинке: незаконченный набор работает против вас."],
             ].map(([Icon, title, text]) => {
               const I = Icon as typeof Clock;

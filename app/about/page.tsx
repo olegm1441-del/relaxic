@@ -69,7 +69,7 @@ export default function AboutPage() {
         <h2 className="text-[var(--text)]">Что мы обещаем</h2>
         <p>
           Честную сложность и время. Полный состав коробки с фотографией до покупки.
-          Доставку по всей России и{" "}
+          Доставку по РФ и{" "}
           <Link href="/delivery">бесплатную от {price(COMPANY.freeDeliveryFrom)}</Link>. И живого человека
           на телефоне, а не форму обратной связи.
         </p>

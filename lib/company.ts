@@ -26,8 +26,8 @@ export const COMPANY = {
   phoneHref: "tel:+79655959997",
   email: "hello@relaxic.ru",
 
-  geo: "Вся Россия",
-  deliveryZone: "Доставка по всей России",
+  geo: "Работаем по РФ",
+  deliveryZone: "Доставка по РФ",
   /** Порог бесплатной доставки, в копейках */
   freeDeliveryFrom: 500_000,
 

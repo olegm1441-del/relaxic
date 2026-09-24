@@ -56,7 +56,10 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           <span className="tnum">~{fmtHours(product.hours)}</span>
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-2">
+        {/* mt-auto прижимает цену и кнопку к низу: у карточек строка со
+            сложностью иногда переносится на вторую строку, и без этого
+            кнопки в ряду вставали на разной высоте. */}
+        <div className="mt-auto flex items-center justify-between gap-2 pt-4">
           <Price value={product.price} old={product.oldPrice} />
         </div>
 

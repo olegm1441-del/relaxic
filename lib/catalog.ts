@@ -129,20 +129,6 @@ export function difficultyLabel(n: number): string {
 
 /** Быстрые входы в каталог — по задаче, а не по свойству товара.
  *  Люди приходят с «чем занять вечер» и «что подарить», а не с «сложность 2». */
-export const QUICK_ENTRIES: {
-  title: string; note: string; href: string;
-  /** Подбор — не сокращение фильтра, а другой путь. Отмечаем цветом, чтобы
-   *  он не терялся в ряду одинаковых серых чипсов. */
-  accent?: boolean;
-}[] = [
-  { title: "На один вечер", note: "до 5 часов", href: "/catalog?hours=0-5" },
-  { title: "Первый набор", note: "сложность 1–2", href: "/catalog?difficulty=1,2" },
-  { title: "Детям", note: "от 6 лет", href: "/catalog?age=6" },
-  { title: "В подарок", note: "то, что закончат", href: "/gifts" },
-  { title: "Вызов на месяц", note: "от 30 часов", href: "/catalog?hours=30%2B" },
-  { title: "Подобрать за 3 вопроса", note: "40 секунд", href: "/quiz", accent: true },
-];
-
 // ── Цена и размеры ───────────────────────────────────────────
 export function sizesFor(p: Product): Size[] {
   // Самый маленький формат не выпускаем для сложных: 38 цветов на 20×20 не лягут
@@ -368,6 +354,52 @@ export function applyFacets(list: Product[], f: Facets): Product[] {
   }
   return sorted;
 }
+
+// ── Быстрые входы ────────────────────────────────────────────
+/**
+ * Фасеты отвечают на вопрос «какой товар», а человек приходит с вопросом
+ * «какая у меня задача»: занять вечер, подарить, дать ребёнку. Между этими
+ * формулировками — лишний шаг, на котором часть людей уходит.
+ *
+ * Стоит после applyFacets намеренно: ссылка и счётчик считаются из одного
+ * и того же набора фасетов, иначе цифра на плитке и цифра в каталоге
+ * однажды разойдутся. Раньше по ссылке было нечем проверить, сколько там
+ * наборов, — теперь это видно до клика.
+ */
+export interface QuickEntry {
+  title: string;
+  note: string;
+  href: string;
+  /** Ключ иконки: сопоставление с lucide живёт в компоненте, lib без React */
+  icon: "clock" | "sparkles" | "child" | "gift" | "mountain" | "wand";
+  /** null — переход не в каталог, считать нечего */
+  count: number | null;
+  /** Подбор — не сокращение фильтра, а другой путь. Отмечаем цветом, чтобы
+   *  он не терялся в ряду одинаковых плиток. */
+  accent?: boolean;
+}
+
+function catalogEntry(
+  title: string, note: string, icon: QuickEntry["icon"], f: Facets,
+): QuickEntry {
+  const qs = new URLSearchParams();
+  if (f.hours?.length) qs.set("hours", f.hours.join(","));
+  if (f.difficulty?.length) qs.set("difficulty", f.difficulty.join(","));
+  if (f.age?.length) qs.set("age", f.age.join(","));
+  return { title, note, icon, href: `/catalog?${qs.toString()}`, count: applyFacets(PRODUCTS, f).length };
+}
+
+export const QUICK_ENTRIES: QuickEntry[] = [
+  // До 5 часов в ассортименте лежит ровно один набор — плитка вела в тупик.
+  // Порог в 15 часов собирает десять и остаётся честным: цифра на плитке
+  // считается по тем же фасетам, что уедут в ссылку.
+  catalogEntry("Быстрые наборы", "до 15 часов", "clock", { hours: ["0-5", "5-15"] }),
+  catalogEntry("Первый набор", "сложность 1–2", "sparkles", { difficulty: [1, 2] }),
+  catalogEntry("Детям", "от 6 лет", "child", { age: ["6"] }),
+  { title: "В подарок", note: "то, что закончат", href: "/gifts", icon: "gift", count: null },
+  catalogEntry("Вызов на месяц", "от 30 часов", "mountain", { hours: ["30+"] }),
+  { title: "Подобрать за 3 вопроса", note: "40 секунд", href: "/quiz", icon: "wand", count: null, accent: true },
+];
 
 /** Разбор query-параметров. Мультивыбор приходит как «a,b,c». */
 export function parseFacets(sp: Record<string, string | string[] | undefined>): Facets {

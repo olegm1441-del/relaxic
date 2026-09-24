@@ -18,7 +18,7 @@ export async function generateMetadata({
     title: "Каталог наборов — все техники и вселенные",
     description:
       "Все наборы Relaxic: картины по номерам, алмазные мозаики и вышивка. " +
-      "Фильтры по вселенной, сложности и времени сборки. Доставка по всей России.",
+      "Фильтры по вселенной, сложности и времени сборки. Доставка по РФ.",
     alternates: { canonical: "/catalog" },
     robots: filtered ? { index: false, follow: true } : undefined,
   };
@@ -38,8 +38,8 @@ export default async function CatalogPage({
       <header className="mb-8 lg:mb-12">
         <h1 className="h1">Каталог</h1>
         <p className="measure mt-4 text-[var(--text-muted)]">
-          {PRODUCTS.length} наборов в трёх техниках. У каждого указаны честная сложность
-          и время сборки — не «за вечер», а в часах.{" "}
+          {PRODUCTS.length} наборов в трёх техниках. У каждого указаны сложность
+          и время сборки в часах.{" "}
           <Link href="/how-it-works" className="underline underline-offset-2">Чем техники отличаются</Link>.
         </p>
       </header>

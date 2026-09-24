@@ -87,7 +87,7 @@ export function ProductBuy({
         <p className="flex items-start gap-2.5 text-sm">
           <Truck size={18} className="mt-0.5 shrink-0 text-[var(--color-turquoise)]" />
           <span>
-            <span className="font-semibold">Доставка 2–5 дней</span> по всей России, СДЭК или Яндекс.
+            <span className="font-semibold">Доставка 2–5 дней</span> по РФ, СДЭК или Яндекс.
             <br />
             {left === 0 ? (
               <span className="text-[var(--color-turquoise)]">С этим набором доставка бесплатная.</span>
