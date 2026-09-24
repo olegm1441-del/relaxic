@@ -70,7 +70,7 @@ export function Header({ techniques }: { techniques: MenuTechnique[] }) {
           {mobile ? <X size={22} /> : <Menu size={22} />}
         </button>
 
-        <Logo className="shrink-0" />
+        <Logo className="shrink-0" priority />
 
         {/* ── Десктопное меню: техники первым уровнем ── */}
         <nav ref={navRef} className="hidden flex-1 items-center gap-1 xl:flex" aria-label="Основное меню">

@@ -4,8 +4,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumbs, Brush, Container } from "@/components/ui";
 import { CatalogView, type SearchParams } from "@/components/catalog/CatalogView";
+import { QuickEntries } from "@/components/catalog/QuickEntries";
 import { PRODUCTS, TECHNIQUES, techniqueBySlug } from "@/lib/catalog";
 import { COMPANY } from "@/lib/company";
+import { HOWTO_SLUG } from "@/lib/howto";
+import { price } from "@/lib/format";
 
 export function generateStaticParams() {
   return TECHNIQUES.map((t) => ({ technique: t.slug }));
@@ -41,6 +44,10 @@ export default async function TechniquePage({
 
   const pool = PRODUCTS.filter((p) => p.technique === t.key);
   const others = TECHNIQUES.filter((x) => x.slug !== t.slug);
+  const minPrice = Math.min(...pool.map((p) => p.price));
+  const minHours = Math.min(...pool.map((p) => p.hours));
+  const maxHours = Math.max(...pool.map((p) => p.hours));
+  const howtoSlug = HOWTO_SLUG[t.key];
 
   return (
     <>
@@ -48,38 +55,31 @@ export default async function TechniquePage({
         <Breadcrumbs items={[{ href: "/catalog", title: "Каталог" }, { title: t.title }]} />
       </Container>
 
+      {/* Полоса-кадр вместо большого блока: раньше герой занимал весь первый
+          экран, и до первого товара нужно было прокрутить страницу целиком. */}
+      <div className="relative mb-8 aspect-[2/1] w-full overflow-hidden bg-[var(--color-ink-2)] sm:aspect-[3/1] lg:aspect-[4/1]">
+        <Image src={t.cover} alt="" fill priority sizes="100vw" className="object-cover" />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[rgb(20_17_16/0.45)] to-[rgb(20_17_16/0.25)]" />
+      </div>
+
       <Container className="pb-16">
-        <header className="mb-10 grid gap-6 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-12">
-          <div>
-            <h1 className="h1">{t.title}</h1>
-            <Brush className="mt-5" />
-            <p className="measure mt-5 text-[1.0625rem] leading-relaxed text-[var(--text-muted)]">
-              {t.lead}
-            </p>
-            <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-sm">
-              <div>
-                <dt className="text-[var(--text-muted)]">Наборов</dt>
-                <dd className="tnum mt-0.5 text-[1.125rem] font-bold">{pool.length}</dd>
-              </div>
-              <div>
-                <dt className="text-[var(--text-muted)]">Освоить технику</dt>
-                <dd className="tnum mt-0.5 text-[1.125rem] font-bold">{t.learnMinutes} мин</dd>
-              </div>
-              <div>
-                <dt className="text-[var(--text-muted)]">Кому подходит</dt>
-                <dd className="mt-0.5 font-semibold">{t.forWhom}</dd>
-              </div>
-            </dl>
-            <p className="mt-6 text-sm text-[var(--text-muted)]">
-              <Link href={`/how-it-works/${t.slug === "kartiny-po-nomeram" ? "paint-by-numbers" : t.slug === "almaznaya-mozaika" ? "diamond-mosaic" : "cross-stitch"}`} className="underline underline-offset-2">
-                Разбор техники: что внутри и как собирать
-              </Link>
-            </p>
-          </div>
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-blk)] bg-[var(--color-canvas-2)]">
-            <Image src={t.cover} alt={t.title} fill priority sizes="(max-width: 1024px) 100vw, 45vw" className="object-cover" />
-          </div>
+        <header className="mb-8">
+          <h1 className="h1">{t.title}</h1>
+          <p className="measure mt-4 text-[1.0625rem] leading-relaxed text-[var(--text-muted)]">
+            {t.lead}
+          </p>
+          <ul className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[var(--text-muted)]">
+            <li><span className="tnum font-semibold text-[var(--text)]">{pool.length}</span> наборов</li>
+            <li aria-hidden className="opacity-40">·</li>
+            <li>от <span className="tnum font-semibold text-[var(--text)]">{price(minPrice)}</span></li>
+            <li aria-hidden className="opacity-40">·</li>
+            <li>от <span className="tnum font-semibold text-[var(--text)]">{minHours} ч</span> до <span className="tnum font-semibold text-[var(--text)]">{maxHours} ч</span> сборки</li>
+            <li aria-hidden className="opacity-40">·</li>
+            <li>{t.forWhom.toLowerCase()}</li>
+          </ul>
         </header>
+
+        <QuickEntries className="mb-9" />
 
         <CatalogView
           pool={pool}
@@ -87,7 +87,24 @@ export default async function TechniquePage({
           hideParams={["technique"]}
         />
 
-        <nav className="mt-16 border-t border-[var(--border)] pt-8">
+        <section className="mt-16 border-t border-[var(--border)] pt-8">
+          <Link href={`/how-it-works/${howtoSlug}`} className="card card-lift flex items-center gap-5 p-5 no-underline">
+            <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-[var(--radius-ui)] bg-[var(--color-canvas-2)]">
+              <Image src={t.box} alt="" fill sizes="112px" className="object-cover" />
+            </div>
+            <div className="min-w-0">
+              <p className="caption text-[var(--text-muted)]">Перед покупкой</p>
+              <p className="mt-1.5 font-semibold text-[var(--text)]">
+                {t.one}: что внутри коробки, как собирать и три ошибки новичка
+              </p>
+              <p className="mt-1 text-[0.8125rem] text-[var(--text-muted)]">
+                Разбор техники · освоить за {t.learnMinutes} минут
+              </p>
+            </div>
+          </Link>
+        </section>
+
+        <nav className="mt-10 border-t border-[var(--border)] pt-8">
           <h2 className="caption text-[var(--text-muted)]">Другие техники</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {others.map((o) => (

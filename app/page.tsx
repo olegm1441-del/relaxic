@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Clock, Gift, Package, Sparkles, Truck } from "lucide-react";
 import { Brush, Container, SectionHead } from "@/components/ui";
 import { ProductGrid } from "@/components/catalog/ProductCard";
+import { QuickEntries } from "@/components/catalog/QuickEntries";
 import {
   ARTICLES, FANDOMS, PRODUCTS, TECHNIQUES, fandomCover, galleryItems, hits,
 } from "@/lib/catalog";
@@ -22,88 +23,93 @@ export default function Home() {
   return (
     <>
       {/* ── Hero ──
-           Не растянутое фото на весь экран, а композиция: слева слово,
-           справа три обложки в родном разрешении. Так кадры остаются
-           резкими на любом экране и сразу показывают, что мы продаём. */}
-      <section className="relative overflow-hidden">
-        <div aria-hidden className="absolute inset-0 opacity-[0.10]">
-          <Image src="/img/texture/canvas-grain.jpg" alt="" fill sizes="100vw" className="object-cover" />
-        </div>
-        <div
-          aria-hidden
-          className="absolute -right-40 -top-40 h-[560px] w-[560px] rounded-full opacity-25 blur-[120px]"
-          style={{ background: "radial-gradient(circle, var(--color-surik), transparent 70%)" }}
-        />
+           Ни текстуры, ни цветного свечения: фон — чистый Уголь, всё внимание
+           на кадр. Картинка стоит первой и на узких экранах тоже — иначе
+           первый экран превращается в серое поле с текстом.
+           Текст прижат вправо в своей половине: его левый край совпадает
+           с колонкой контейнера на любой ширине, от 1280 до 2560. */}
+      <section className="relative border-b border-[var(--border)]">
+        <div className="grid lg:grid-cols-2">
+          <div className="relative order-first aspect-[5/4] min-[480px]:aspect-[16/10] lg:order-last lg:aspect-auto lg:min-h-[600px]">
+            <Image
+              src="/img/mood/finished-wall.jpg"
+              alt="Собранные наборы Relaxic в интерьере"
+              fill
+              priority
+              quality={85}
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[rgb(20_17_16/0.12)] to-transparent lg:bg-[linear-gradient(to_right,var(--bg)_0%,rgb(20_17_16/0.35)_14%,transparent_38%)]"
+            />
+          </div>
 
-        <Container className="relative grid items-center gap-12 py-14 lg:grid-cols-[1fr_minmax(0,52%)] lg:gap-16 lg:py-24">
-          <div>
-            <p className="caption text-[var(--accent)]">Наборы для сборки · {COMPANY.geo}</p>
-            <h1 className="display mt-5 max-w-[14ch]">
-              Соберите свою вселенную
-            </h1>
-            <p className="measure mt-6 text-[1.0625rem] leading-relaxed text-[var(--text-muted)] lg:text-[1.1875rem]">
-              Картины по номерам, алмазные мозаики и вышивка по кадрам из кино, сериалов и игр.
-              У каждого набора честно указаны сложность и время сборки — в часах, а не «за вечер».
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/catalog" className="btn btn-primary">Смотреть каталог</Link>
-              <Link href="/quiz" className="btn btn-secondary">Подобрать за 3 вопроса</Link>
+          <div className="flex items-center">
+            <div className="ml-auto w-full max-w-[640px] px-4 pb-14 pt-8 sm:px-6 lg:py-24 lg:pr-12">
+              <h1 className="display max-w-[14ch]">Соберите свою вселенную</h1>
+              <p className="measure mt-6 text-[1.0625rem] leading-relaxed text-[var(--text-muted)] lg:text-[1.1875rem]">
+                Картины по номерам, алмазные мозаики и вышивка по кадрам из кино,
+                сериалов и игр. У каждого набора честно указаны сложность и время
+                сборки — в часах, а не «за вечер».
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/catalog" className="btn btn-primary">Смотреть каталог</Link>
+                <Link href="/quiz" className="btn btn-secondary">Подобрать за 3 вопроса</Link>
+              </div>
+              <dl className="mt-10 grid grid-cols-3 gap-4 text-sm">
+                {[
+                  [String(PRODUCTS.length), "наборов в трёх техниках"],
+                  [String(FANDOMS.length), "вселенных"],
+                  [price(COMPANY.freeDeliveryFrom), "и доставка по РФ бесплатна"],
+                ].map(([n, t]) => (
+                  <div key={t}>
+                    <dt className="tnum text-[1.375rem] font-bold leading-none lg:text-[1.5rem]">{n}</dt>
+                    <dd className="mt-1.5 text-[0.8125rem] leading-snug text-[var(--text-muted)] lg:text-sm">{t}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
-            <dl className="mt-10 flex flex-wrap gap-x-10 gap-y-4 text-sm">
-              {[
-                [String(PRODUCTS.length), "наборов в трёх техниках"],
-                [String(FANDOMS.length), "вселенных"],
-                [price(COMPANY.freeDeliveryFrom), "и доставка бесплатна"],
-              ].map(([n, t]) => (
-                <div key={t}>
-                  <dt className="tnum text-[1.5rem] font-bold leading-none">{n}</dt>
-                  <dd className="mt-1.5 text-[var(--text-muted)]">{t}</dd>
-                </div>
-              ))}
-            </dl>
           </div>
-
-          {/* Одна крупная обложка и две поменьше. «Раскрашивание» — со сдвигом,
-              как требует бренд-бук: приём работает, пока он дозирован. */}
-          <div className="grid grid-cols-2 grid-rows-2 gap-3 lg:gap-4">
-            {[
-              { slug: "harry-potter", pad: "row-span-2" },
-              { slug: "cyberpunk", pad: "" },
-              { slug: "studio-ghibli", pad: "" },
-            ].map(({ slug, pad }, i) => {
-              const f = FANDOMS.find((x) => x.slug === slug)!;
-              return (
-                <Link
-                  key={slug}
-                  href={`/fandom/${slug}`}
-                  className={`paint-in card card-lift group relative overflow-hidden no-underline ${pad} ${i === 0 ? "aspect-[3/5]" : "aspect-[4/3]"}`}
-                  style={{ animationDelay: `${i * 90}ms` }}
-                >
-                  <Image
-                    src={fandomCover(slug)}
-                    alt={f.title}
-                    fill
-                    priority={i === 0}
-                    quality={85}
-                    sizes="(max-width: 1024px) 46vw, 26vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
-                  />
-                  <span className="absolute inset-0 bg-gradient-to-t from-[rgb(20_17_16/0.9)] via-transparent to-transparent" />
-                  <span className="absolute inset-x-0 bottom-0 p-3 text-[0.75rem] font-semibold leading-tight text-[var(--color-canvas)] sm:text-[0.8125rem]">
-                    {f.title}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </Container>
+        </div>
       </section>
 
-      {/* ── Три техники ── */}
+      {/* ── Хиты ── */}
       <section className="section">
         <Container>
           <SectionHead
             no="01"
+            title="Берут чаще всего"
+            lead="Наборы, которые заканчивают, а не убирают в шкаф на втором вечере."
+            href="/catalog"
+            hrefLabel="Весь каталог"
+          />
+          <ProductGrid products={top} />
+        </Container>
+      </section>
+
+      {/* ── С чего начать ──
+           Ориентация по задаче, а не по свойству товара. Стоит сразу после
+           витрины: человек увидел наборы и спрашивает «а мне какой». */}
+      <section className="section pt-0">
+        <Container>
+          <SectionHead
+            no="02"
+            title="С чего начать"
+            lead="Люди приходят с задачей — занять вечер, подарить, дать ребёнку. Вот готовые выборки под каждую."
+            href="/catalog"
+            hrefLabel="Весь каталог"
+          />
+          <QuickEntries withHeading={false} />
+        </Container>
+      </section>
+
+      {/* ── Три техники ── */}
+      <section className="section pt-0">
+        <Container>
+          <SectionHead
+            no="03"
             title="Три техники — три разных вечера"
             lead="Сначала выберите процесс: кисть, стразы или нить. Вселенная — следующим шагом."
             href="/how-it-works"
@@ -146,7 +152,7 @@ export default function Home() {
       <section className="section pt-0">
         <Container>
           <SectionHead
-            no="02"
+            no="04"
             title="Вселенные"
             lead="Люди выбирают не технику, а героя. Начните отсюда, если точно знаете, что любите."
             href="/fandom"
@@ -183,40 +189,6 @@ export default function Home() {
               <span className="text-[0.75rem] text-[var(--text-muted)]">и наборы на заказ</span>
             </Link>
           </div>
-        </Container>
-      </section>
-
-      {/* ── Квиз ── */}
-      <section className="section pt-0">
-        <Container>
-          <div className="card overflow-hidden lg:flex lg:items-stretch">
-            <div className="relative aspect-[16/10] bg-[var(--color-canvas-2)] lg:aspect-auto lg:w-[42%]">
-              <Image src="/img/mood/evening-hands.jpg" alt="" fill sizes="(max-width: 1024px) 100vw, 42vw" className="object-cover" />
-            </div>
-            <div className="flex-1 p-6 lg:p-10">
-              <p className="caption text-[var(--accent)]">№ 03 · 40 секунд</p>
-              <h2 className="h2 mt-3">Не знаете, с чего начать?</h2>
-              <p className="measure mt-4 text-[var(--text-muted)]">
-                Три вопроса: кому, на сколько вечеров и какая вселенная.
-                Покажем 4–6 наборов, которые точно доведут до конца, — а не «всё подряд».
-              </p>
-              <Link href="/quiz" className="btn btn-primary mt-7">Подобрать набор</Link>
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      {/* ── Хиты ── */}
-      <section className="section pt-0">
-        <Container>
-          <SectionHead
-            no="04"
-            title="Берут чаще всего"
-            lead="Наборы, которые заканчивают, а не убирают в шкаф на втором вечере."
-            href="/catalog"
-            hrefLabel="Весь каталог"
-          />
-          <ProductGrid products={top} />
         </Container>
       </section>
 

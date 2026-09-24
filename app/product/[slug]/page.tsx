@@ -2,15 +2,17 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { HelpCircle } from "lucide-react";
 import { Breadcrumbs, Badge, Container, Difficulty, Rating, SectionHead, Stars } from "@/components/ui";
 import { ProductGrid } from "@/components/catalog/ProductCard";
 import { BundleCard } from "@/components/product/BundleCard";
 import { ProductBuy, ProductGallery } from "@/components/product/ProductBuy";
 import {
-  PRODUCTS, articleForProduct, bundleForFandom, fandomBySlug, fromSameFandom,
-  productBySlug, ratingFor, reviewsFor, sameArtwork, similarDifficulty, sizesFor,
-  techniqueByKey,
+  PRODUCTS, articleForProduct, bundleForFandom, difficultyLabel, fandomBySlug,
+  fromSameFandom, productBySlug, ratingFor, reviewsFor, sameArtwork,
+  similarDifficulty, sizesFor, techniqueByKey,
 } from "@/lib/catalog";
+import { HOWTO, HOWTO_SLUG } from "@/lib/howto";
 import { COMPANY } from "@/lib/company";
 import { hours as fmtHours, evenings, price, reviewsWord } from "@/lib/format";
 
@@ -120,7 +122,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <div className="rounded-[var(--radius-card)] border border-[var(--border)] p-3.5">
                 <dt className="text-[0.75rem] text-[var(--text-muted)]">Сложность</dt>
                 <dd className="mt-2"><Difficulty value={product.difficulty} size={8} /></dd>
-                <dd className="mt-1.5 text-[0.75rem] text-[var(--text-muted)]">{product.difficulty} из 5</dd>
+                <dd className="mt-1.5 text-[0.75rem] text-[var(--text-muted)]">{difficultyLabel(product.difficulty)}</dd>
               </div>
               <div className="rounded-[var(--radius-card)] border border-[var(--border)] p-3.5">
                 <dt className="text-[0.75rem] text-[var(--text-muted)]">Время сборки</dt>
@@ -142,6 +144,26 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               techniqueTitle={tech.one}
               fandomTitle={fandom?.title ?? ""}
             />
+
+            {/* Этап «оценка» в пути клиента: главный страх — не цена, а «а я справлюсь».
+                Отвечаем прямо у кнопки, а не статьёй в подвале. */}
+            <Link
+              href={`/how-it-works/${HOWTO_SLUG[product.technique]}`}
+              className="card card-lift mt-4 flex items-center gap-4 p-4 no-underline"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--accent)_16%,transparent)] text-[var(--accent)]">
+                <HelpCircle size={20} />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold text-[var(--text)]">
+                  Первый раз в этой технике?
+                </span>
+                <span className="mt-0.5 block text-[0.8125rem] text-[var(--text-muted)]">
+                  {HOWTO[product.technique].steps.length} шагов, три ошибки новичка и ответы —
+                  освоить за {tech.learnMinutes} минут
+                </span>
+              </span>
+            </Link>
 
             {others.length > 0 && (
               <div className="mt-6 rounded-[var(--radius-card)] border border-[var(--border)] p-4">

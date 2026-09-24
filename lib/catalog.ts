@@ -113,6 +113,31 @@ export function similarDifficulty(p: Product, limit = 4): Product[] {
   return uniqueByArtwork(sorted, limit);
 }
 
+/**
+ * Подпись к сложности словами.
+ *
+ * Пять точек отвечают «насколько», но не отвечают «справлюсь ли я» —
+ * а это и есть настоящий вопрос человека перед покупкой. Слово снимает
+ * возражение там, где шкала его только обозначает.
+ */
+export function difficultyLabel(n: number): string {
+  if (n <= 2) return "новичку";
+  if (n === 3) return "если уже собирали";
+  if (n === 4) return "нужен опыт";
+  return "для опытных";
+}
+
+/** Быстрые входы в каталог — по задаче, а не по свойству товара.
+ *  Люди приходят с «чем занять вечер» и «что подарить», а не с «сложность 2». */
+export const QUICK_ENTRIES: { title: string; note: string; href: string }[] = [
+  { title: "На один вечер", note: "до 5 часов", href: "/catalog?hours=0-5" },
+  { title: "Первый набор", note: "сложность 1–2", href: "/catalog?difficulty=1,2" },
+  { title: "Детям", note: "от 6 лет", href: "/catalog?age=6" },
+  { title: "В подарок", note: "то, что закончат", href: "/gifts" },
+  { title: "Вызов на месяц", note: "от 30 часов", href: "/catalog?hours=30%2B" },
+  { title: "Подобрать за 3 вопроса", note: "40 секунд", href: "/quiz" },
+];
+
 // ── Цена и размеры ───────────────────────────────────────────
 export function sizesFor(p: Product): Size[] {
   // Самый маленький формат не выпускаем для сложных: 38 цветов на 20×20 не лягут

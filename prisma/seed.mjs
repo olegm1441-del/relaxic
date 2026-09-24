@@ -134,6 +134,35 @@ async function main() {
   }
   console.log(`  seed: статей — ${ARTICLES.length}`);
 
+  // ── Уборка за прежними версиями каталога ──────────────────
+  //
+  // После деплоя /api/health показывал 37 товаров вместо 25: в базе
+  // остались строки от первой версии сида, со старыми слагами. На витрину
+  // они не попадали (страницы читают файл каталога), но цифра врала,
+  // и любая будущая админка увидела бы призрачные SKU.
+  //
+  // Удалять безопасно: создать товар в этой базе может только сид —
+  // ни админки, ни API записи в каталог нет. Заказы при этом целы:
+  // позиция хранит слаг, название и цену снимком, а productId
+  // обнуляется сам, связь необязательная.
+  const liveProducts = PRODUCTS.map((p) => p.slug);
+  const stale = await prisma.product.findMany({
+    where: { slug: { notIn: liveProducts } },
+    select: { id: true, slug: true },
+  });
+  if (stale.length) {
+    await prisma.product.deleteMany({ where: { id: { in: stale.map((p) => p.id) } } });
+    console.log(`  seed: убрано товаров от прежних версий — ${stale.length}`);
+  }
+
+  const liveArticles = ARTICLES.map((a) => a.slug);
+  const staleArticles = await prisma.article.deleteMany({
+    where: { slug: { notIn: liveArticles } },
+  });
+  if (staleArticles.count) {
+    console.log(`  seed: убрано статей от прежних версий — ${staleArticles.count}`);
+  }
+
   const galleryCount = await prisma.galleryItem.count();
   if (galleryCount === 0) {
     await prisma.galleryItem.createMany({

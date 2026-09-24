@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Badge, Difficulty, Price } from "@/components/ui";
-import { AddToCart } from "@/components/cart/AddToCart";
-import { fandomBySlug, techniqueByKey, type Product } from "@/lib/catalog";
+import { difficultyLabel, fandomBySlug, techniqueByKey, type Product } from "@/lib/catalog";
 import { hours as fmtHours } from "@/lib/format";
 
 /**
@@ -49,8 +49,10 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           {fandom?.title} · {tech.short}
         </p>
 
-        <div className="mt-3 flex items-center gap-3 text-[0.75rem] text-[var(--text-muted)]">
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.75rem] text-[var(--text-muted)]">
           <Difficulty value={product.difficulty} />
+          <span>{difficultyLabel(product.difficulty)}</span>
+          <span aria-hidden className="opacity-40">·</span>
           <span className="tnum">~{fmtHours(product.hours)}</span>
         </div>
 
@@ -58,19 +60,13 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           <Price value={product.price} old={product.oldPrice} />
         </div>
 
+        {/* Ведём на карточку, а не кладём в корзину одним кликом: размер
+            меняет цену, и молча подставлять 30×40 — обманывать покупателя. */}
         <div className="mt-3">
-          <AddToCart
-            className="btn btn-secondary btn-sm w-full"
-            line={{
-              slug: product.slug,
-              title: product.title,
-              techniqueTitle: tech.one,
-              fandomTitle: fandom?.title ?? "",
-              size: "30×40",
-              price: product.price,
-              image: product.images[0].url,
-            }}
-          />
+          <Link href={`/product/${product.slug}`} className="btn btn-card btn-sm w-full no-underline">
+            Выбрать набор
+            <ArrowRight size={15} />
+          </Link>
         </div>
       </div>
     </article>

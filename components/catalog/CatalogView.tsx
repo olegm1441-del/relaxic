@@ -77,11 +77,14 @@ export function CatalogView({
     <div className="grid gap-8 lg:grid-cols-[260px_1fr] lg:gap-10">
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <Suspense fallback={<div className="h-10" />}>
-          <Filters groups={groups} sorts={SORTS} total={list.length} hideParams={hideParams} />
+          <Filters slot="panel" groups={groups} sorts={SORTS} total={list.length} hideParams={hideParams} />
         </Suspense>
       </aside>
 
       <div>
+        <Suspense fallback={<div className="mb-6 h-11" />}>
+          <Filters slot="toolbar" groups={groups} sorts={SORTS} total={list.length} hideParams={hideParams} />
+        </Suspense>
         {list.length > 0 ? (
           <ProductGrid products={list} priorityCount={4} />
         ) : (

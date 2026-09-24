@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { Breadcrumbs, Brush, Container, SectionHead } from "@/components/ui";
 import { ProductGrid } from "@/components/catalog/ProductCard";
 import { VideoEmbed } from "@/components/content/VideoEmbed";
-import { ArticleCard } from "../page";
+import { ArticleCard } from "@/components/content/ArticleCard";
 import {
   ARTICLES, ARTICLE_CATEGORIES, articleBySlug, articleCategoryBySlug,
   articlesOfCategory, productsForArticle, relatedArticles,

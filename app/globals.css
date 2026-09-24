@@ -183,6 +183,24 @@
 
   .btn-sm { min-height: 40px; padding-inline: 16px; font-size: 0.875rem; }
 
+/* Кнопка в карточке каталога.
+   Заливать её Суриком нельзя: бренд-бук держит акцент в пределах 5%, а в сетке
+   из четырёх карточек четыре оранжевые кнопки перебивают сам товар. Но и тонкий
+   серый контур не работает — он читается как рамка, а не как действие.
+   Отсюда акцентный контур: Сурик на Угле даёт 4,83:1 и проходит AA,
+   при наведении кнопка заливается целиком. */
+.btn-card {
+  background: transparent;
+  color: var(--accent);
+  border-color: color-mix(in oklab, var(--accent) 55%, transparent);
+  font-weight: 600;
+}
+.btn-card:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
   /* Иконочная кнопка: область нажатия 44×44 минимум */
   .btn-icon {
     display: inline-flex;

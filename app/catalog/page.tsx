@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Breadcrumbs, Container } from "@/components/ui";
 import { CatalogView, type SearchParams } from "@/components/catalog/CatalogView";
+import { QuickEntries } from "@/components/catalog/QuickEntries";
 import { PRODUCTS, TECHNIQUES } from "@/lib/catalog";
 
 /** Комбинации фасетов — noindex, follow: карточки индексируются, миллион комбинаций нет */
@@ -64,6 +65,8 @@ export default async function CatalogPage({
           </Link>
         ))}
       </div>
+
+      <QuickEntries className="mb-10" />
 
       <CatalogView searchParams={sp} />
     </Container>

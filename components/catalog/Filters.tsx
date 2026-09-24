@@ -13,14 +13,21 @@ export interface FilterGroup {
   searchable?: boolean;
 }
 
+/**
+ * Два места на странице: панель со счётчиком и сортировкой — над сеткой,
+ * сами фильтры — в колонке слева. Раньше и то и другое жило в колонке,
+ * и выпадающий список сортировки не помещался в её 260 пикселей:
+ * «Сначала популярные» обрезалось до «Сначала попул…».
+ */
 export function Filters({
-  groups, sorts, total, hideParams = [],
+  groups, sorts, total, hideParams = [], slot = "panel",
 }: {
   groups: FilterGroup[];
   sorts: { key: string; title: string }[];
   total: number;
   /** Параметры, которые не показываем: на странице техники фильтр «техника» лишний */
   hideParams?: string[];
+  slot?: "toolbar" | "panel";
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -82,10 +89,15 @@ export function Filters({
     </div>
   );
 
+  // Колонка с фильтрами: только группы, на десктопе
+  if (slot === "panel") {
+    return <div className="hidden lg:block">{body}</div>;
+  }
+
   return (
     <>
-      {/* Панель сортировки и счётчик — видна всегда */}
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+      {/* Панель над сеткой: счётчик, сортировка и вход в мобильные фильтры */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <p className="text-sm text-[var(--text-muted)]">
           <span className="tnum font-semibold text-[var(--text)]">{total}</span>{" "}
           {total === 1 ? "набор" : total % 10 >= 2 && total % 10 <= 4 && (total % 100 < 10 || total % 100 >= 20) ? "набора" : "наборов"}
@@ -117,9 +129,6 @@ export function Filters({
           </button>
         </div>
       </div>
-
-      {/* Десктоп — колонка слева */}
-      <div className="hidden lg:block">{body}</div>
 
       {/* Мобильный — шторка снизу */}
       {open && (
