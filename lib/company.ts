@@ -2,36 +2,34 @@
  * Реквизиты и контакты. Всё в одном месте: подвал, контакты,
  * оферта и политика конфиденциальности читают отсюда.
  *
- * ЗАГЛУШКИ помечены TODO — заменить перед реальными продажами.
- * До замены юридические страницы недействительны.
+ * Данные настоящие — выписка из ЕГРН от 23.09.2026.
+ * Персональные данные предпринимателя (дата и место рождения) на сайт
+ * намеренно не выносятся: для оферты и 152-ФЗ достаточно ФИО, ИНН и ОГРНИП.
  */
 
 export const COMPANY = {
   brand: "Relaxic",
   slogan: "Соберите свою вселенную.",
 
-  // TODO: заглушка — подставить настоящие реквизиты ООО
-  legalName: 'ООО «РЕЛАКСИК»',
-  inn: "0000000000",
-  ogrn: "0000000000000",
-  kpp: "000000000",
-  legalAddress: "000000, Россия, г. ______, ул. ______, д. __, оф. __",
-  director: "—",
-  bankAccount: "00000000000000000000",
-  bankName: "—",
-  bik: "000000000",
+  legalName: "ИП Рыбаков Олег Дмитриевич",
+  legalNameShort: "ИП Рыбаков О. Д.",
+  inn: "166030217450",
+  ogrnip: "326169000227070",
+  taxOffice: "Межрайонная ИФНС России № 6 по Республике Татарстан",
+  registeredAt: "23.09.2026",
+  city: "Казань",
+  foundedYear: 2026,
 
-  siteUrl: "https://relaxic-production.up.railway.app",
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "https://relaxic-production.up.railway.app",
 
-  // Настоящие данные
   phone: "+7 965 595-99-97",
   phoneHref: "tel:+79655959997",
-  email: "hello@relaxic.ru",          // TODO: подтвердить почту
+  email: "hello@relaxic.ru",
 
-  // География
   geo: "Вся Россия",
   deliveryZone: "Доставка по всей России",
-  freeDeliveryFrom: 500000,            // 5 000 ₽ в копейках
+  /** Порог бесплатной доставки, в копейках */
+  freeDeliveryFrom: 500_000,
 
   social: {
     vk: null as string | null,
@@ -39,6 +37,6 @@ export const COMPANY = {
   },
 } as const;
 
-/** true, пока в реквизитах стоят заглушки */
-export const HAS_PLACEHOLDER_LEGAL =
-  COMPANY.inn === "0000000000" || COMPANY.ogrn === "0000000000000";
+/** Строка для подвала и юридических страниц */
+export const LEGAL_LINE =
+  `${COMPANY.legalName} · ИНН ${COMPANY.inn} · ОГРНИП ${COMPANY.ogrnip}`;

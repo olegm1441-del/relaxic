@@ -1,9 +1,11 @@
 /**
  * Демо-данные Relaxic.
  *
+ * Читает тот же lib/data/catalog.mjs, что и сайт, — иначе база и страницы
+ * разойдутся, и отличие вылезет уже на проде.
+ *
  * Обычный .mjs, а не .ts под tsx: на Railway NODE_ENV=production,
  * npm ci пропускает devDependencies, и tsx там просто не окажется.
- * @prisma/client — обычная зависимость, поэтому node справится сам.
  *
  * Скрипт идемпотентен: гоняется при каждом деплое и ничего не дублирует.
  * Всё созданное помечается isSeeded, чтобы потом одним запросом
@@ -11,6 +13,13 @@
  */
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import {
+  FANDOMS,
+  PRODUCTS,
+  SIZES,
+  ARTICLES,
+  REVIEW_POOL,
+} from "../lib/data/catalog.mjs";
 
 const url = process.env.DATABASE_URL;
 if (!url) {
@@ -20,138 +29,132 @@ if (!url) {
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
 
-const FANDOMS = [
-  ["harry-potter",    "Гарри Поттер",    "FILM",    "Магия, которую можно собрать руками"],
-  ["marvel",          "Марвел",          "FILM",    "Герои, на которых выросли"],
-  ["game-of-thrones", "Игра престолов",  "SERIES",  "Север помнит"],
-  ["star-wars",       "Звёздные войны",  "FILM",    "Давным-давно в далёкой галактике"],
-  ["cyberpunk",       "Киберпанк",       "GAME",    "Неон, дождь и провода"],
-  ["anime",           "Аниме",           "ANIME",   "Кадры, которые хочется на стену"],
-  ["studio-ghibli",   "Аниме-классика",  "ANIME",   "Тёплое детство на холсте"],
-  ["retro-games",     "Ретро-игры",      "CARTOON", "Пиксели, на которых мы выросли"],
-  ["cult-cinema",     "Культовое кино",  "FILM",    "Нуар, дождь и один фонарь"],
-];
-
-// [slug, название, фандом, техника, цена(коп), сложность, часы, цветов]
-const PRODUCTS = [
-  ["great-hall",   "Большой зал",          "harry-potter",    "DIAMOND_MOSAIC",   149000, 4, 18, 32],
-  ["owl-mini",     "Сова на ветке",        "harry-potter",    "PAINT_BY_NUMBERS",  80000, 1,  3, 12],
-  ["snow-rider",   "Всадник в метели",     "game-of-thrones", "PAINT_BY_NUMBERS", 129000, 3, 12, 24],
-  ["dragon-peak",  "Дракон над вершиной",  "game-of-thrones", "DIAMOND_MOSAIC",   150000, 5, 28, 38],
-  ["spider-city",  "Полёт над городом",    "marvel",          "PAINT_BY_NUMBERS", 135000, 3, 14, 28],
-  ["nebula",       "Сияющая галактика",    "star-wars",       "DIAMOND_MOSAIC",   142000, 4, 19, 26],
-  ["neon-alley",   "Неоновый переулок",    "cyberpunk",       "DIAMOND_MOSAIC",   148000, 5, 24, 34],
-  ["anime-rooftop","Закат над крышей",     "anime",           "PAINT_BY_NUMBERS", 119000, 2,  8, 20],
-  ["samurai-rain", "Самурай под дождём",   "anime",           "DIAMOND_MOSAIC",   145000, 5, 26, 36],
-  ["cozy-village", "Деревня у моря",       "studio-ghibli",   "PAINT_BY_NUMBERS", 125000, 3, 10, 22],
-  ["arcade-night", "Ночь у автомата",      "retro-games",     "PAINT_BY_NUMBERS",  99000, 2,  7, 16],
-  ["noir-street",  "Нуарная улица",        "cult-cinema",     "CROSS_STITCH",     128000, 4, 22, 18],
-];
-
-const SIZES = [["20×20", 20, 20, -30000], ["30×40", 30, 40, 0], ["40×50", 40, 50, 20000]];
-
-const REVIEW_TEXTS = [
-  ["Марина К.", 5, "Собирала три вечера, оторваться не могла. Стразы плотные, ничего не осыпалось."],
-  ["Дмитрий Р.", 5, "Брал для себя после работы. Холст плотный, схема чёткая — как раз то, что искал."],
-  ["Аня", 4, "Красиво вышло, но на мелкие детали ушло больше времени, чем думала. Результатом довольна."],
-  ["Екатерина С.", 5, "Сыну семь, собрал почти сам. Детали крупные, краски без запаха."],
-  ["Игорь", 5, "Второй набор беру. Качество то же, что в первый раз."],
-];
-
-const ARTICLES = [
-  ["chem-zanyat-rebenka", "Чем занять ребёнка без экрана", "WORKSHOP",
-   "Десять занятий, которые держат внимание дольше мультика."],
-  ["mozaika-vs-nomera", "Мозаика или картина по номерам", "WORKSHOP",
-   "Чем техники отличаются на самом деле и что выбрать новичку."],
-  ["relaks-rukami", "Почему монотонная работа руками снимает тревогу", "RELAX",
-   "Что происходит с вниманием, когда руки заняты простым делом."],
-];
+/** Тот же хеш, что в lib/catalog.ts: отзывы в базе и на сайте должны совпасть */
+function hash(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h);
+}
 
 async function main() {
   console.log("  seed: наполняю базу…");
 
-  for (const [i, [slug, title, category, tagline]] of FANDOMS.entries()) {
+  for (const [i, f] of FANDOMS.entries()) {
     await prisma.fandom.upsert({
-      where: { slug },
-      create: { slug, title, category, tagline, sort: i, coverUrl: `/img/fandom/${slug}.jpg` },
-      update: { title, category, tagline, sort: i },
+      where: { slug: f.slug },
+      create: {
+        slug: f.slug, title: f.title, brand: f.brand, category: f.category,
+        tagline: f.tagline, description: f.description, tags: f.tags,
+        sort: i, coverUrl: `/img/fandom/${f.slug}.jpg`,
+      },
+      update: {
+        title: f.title, brand: f.brand, category: f.category, tagline: f.tagline,
+        description: f.description, tags: f.tags, sort: i,
+      },
     });
   }
   console.log(`  seed: фандомов — ${FANDOMS.length}`);
 
-  let nProducts = 0, nReviews = 0;
-  for (const [slug, title, fandomSlug, technique, price, difficulty, hours, colors] of PRODUCTS) {
-    const fandom = await prisma.fandom.findUnique({ where: { slug: fandomSlug } });
+  let nReviews = 0;
+  for (const p of PRODUCTS) {
+    const fandom = await prisma.fandom.findUnique({ where: { slug: p.fandom } });
     if (!fandom) continue;
 
+    const data = {
+      title: p.title, fandomId: fandom.id, technique: p.technique,
+      price: p.price, oldPrice: p.oldPrice, difficulty: p.difficulty,
+      hours: p.hours, colorsCount: p.colorsCount, minAge: p.minAge,
+      description: p.lead, story: p.story,
+      boxContents: p.boxContents, specs: p.specs,
+      isHit: p.isHit, isNew: p.isNew, isSeeded: true,
+      seoTitle: p.seoTitle, seoDescription: p.seoDescription,
+    };
     const product = await prisma.product.upsert({
-      where: { slug },
-      create: {
-        slug, title, fandomId: fandom.id, technique, price, difficulty, hours,
-        colorsCount: colors, minAge: difficulty <= 2 ? 6 : 12, isSeeded: true,
-        isHit: difficulty >= 4, isNew: difficulty <= 2,
-        description: `${title} — набор по вселенной «${fandom.title}». ` +
-          `Сложность ${difficulty} из 5, примерно ${hours} часов работы.`,
-        story: `Кадр, который узнают с первого взгляда. Собирается ${hours} часов — ` +
-          `это несколько спокойных вечеров.`,
-        boxContents: [
-          { title: "Холст с нанесённой схемой", note: "плотность 280 г/м²" },
-          { title: `Набор из ${colors} цветов`, note: "запас с избытком" },
-          { title: "Инструмент и подставка", note: "всё, что нужно" },
-          { title: "Крепления для стены", note: "вешается сразу" },
-        ],
-        specs: { canvas: "280 г/м²", colors, hours, difficulty },
-      },
-      update: { title, price, difficulty, hours, isSeeded: true },
+      where: { slug: p.slug },
+      create: { slug: p.slug, ...data },
+      update: data,
     });
-    nProducts++;
 
-    const haveSizes = await prisma.productSize.count({ where: { productId: product.id } });
-    if (haveSizes === 0) {
-      for (const [label, w, h, diff] of SIZES) {
-        await prisma.productSize.create({
-          data: { productId: product.id, label, width: w, height: h, priceDiff: diff },
+    // Размеры и картинки переписываем целиком: так проще держать их в синхроне,
+    // чем сверять по одному, а строк тут десятки, не тысячи.
+    await prisma.productSize.deleteMany({ where: { productId: product.id } });
+    await prisma.productSize.createMany({
+      data: SIZES
+        .filter((s) => !(s.label === "20×20" && p.difficulty >= 4))
+        .map((s) => ({
+          productId: product.id, label: s.label,
+          width: s.width, height: s.height, priceDiff: s.priceDiff,
+        })),
+    });
+
+    await prisma.productImage.deleteMany({ where: { productId: product.id } });
+    await prisma.productImage.createMany({
+      data: p.images.map((img, i) => ({
+        productId: product.id, url: img.url, alt: img.alt, sort: i,
+      })),
+    });
+
+    const existing = await prisma.review.count({ where: { productId: product.id } });
+    if (existing === 0) {
+      const h = hash(p.slug);
+      const count = 3 + (h % 3);
+      const rows = [];
+      for (let i = 0; i < count; i++) {
+        const [authorName, rating, text] = REVIEW_POOL[(h + i * 7) % REVIEW_POOL.length];
+        rows.push({
+          productId: product.id, authorName, rating, text,
+          photoUrl: (h + i) % 3 === 0
+            ? `/img/gallery/work-${String(((h + i) % 10) + 1).padStart(2, "0")}.jpg`
+            : null,
+          isApproved: true, isSeeded: true,
+          createdAt: new Date(Date.now() - (3 + ((h + i * 13) % 120)) * 86400000),
         });
       }
-    }
-
-    const haveImages = await prisma.productImage.count({ where: { productId: product.id } });
-    if (haveImages === 0) {
-      for (let k = 1; k <= 3; k++) {
-        await prisma.productImage.create({
-          data: { productId: product.id, url: `/img/product/${slug}-${k}.jpg`,
-                  alt: `${title} — ракурс ${k}`, sort: k },
-        });
-      }
-    }
-
-    const haveReviews = await prisma.review.count({ where: { productId: product.id } });
-    if (haveReviews === 0) {
-      const picked = REVIEW_TEXTS.slice(0, 2 + (nProducts % 3));
-      for (const [authorName, rating, text] of picked) {
-        await prisma.review.create({
-          data: { productId: product.id, authorName, rating, text,
-                  isApproved: true, isSeeded: true },
-        });
-        nReviews++;
-      }
+      await prisma.review.createMany({ data: rows });
+      nReviews += rows.length;
     }
   }
-  console.log(`  seed: товаров — ${nProducts}, отзывов — ${nReviews}`);
+  console.log(`  seed: товаров — ${PRODUCTS.length}, новых отзывов — ${nReviews}`);
 
-  for (const [slug, title, category, excerpt] of ARTICLES) {
+  for (const a of ARTICLES) {
+    const data = {
+      title: a.title, excerpt: a.excerpt, category: a.category,
+      content: JSON.stringify(a.body), coverUrl: a.cover,
+      readMinutes: a.readMinutes, relatedProductIds: a.related,
+      publishedAt: new Date(),
+    };
     await prisma.article.upsert({
-      where: { slug },
-      create: { slug, title, category, excerpt, readMinutes: 5,
-                publishedAt: new Date(), coverUrl: `/img/blog/workshop.jpg`,
-                content: `# ${title}\n\n${excerpt}\n\nТекст статьи появится позже.` },
-      update: { title, excerpt },
+      where: { slug: a.slug },
+      create: { slug: a.slug, ...data },
+      update: data,
     });
   }
   console.log(`  seed: статей — ${ARTICLES.length}`);
+
+  const galleryCount = await prisma.galleryItem.count();
+  if (galleryCount === 0) {
+    await prisma.galleryItem.createMany({
+      data: Array.from({ length: 10 }, (_, i) => ({
+        imageUrl: `/img/gallery/work-${String(i + 1).padStart(2, "0")}.jpg`,
+        authorName: ["Марина, Казань", "Дмитрий, Пермь", "Аня, Москва", "Екатерина, Уфа",
+          "Игорь, Новосибирск", "Ольга, Самара", "Тимур, Казань", "Настя, Тверь",
+          "Сергей, Ростов", "Вера, Иркутск"][i],
+        caption: PRODUCTS[hash(`work${i + 1}`) % PRODUCTS.length].title,
+        isApproved: true, isSeeded: true,
+      })),
+    });
+    console.log("  seed: галерея — 10 работ");
+  }
+
   console.log("  seed: готово");
 }
 
 main()
-  .catch((e) => { console.error("  seed: ошибка —", e.message); process.exit(1); })
+  .catch((e) => {
+    console.error("  seed: ошибка —", e.message);
+    process.exitCode = 1;
+  })
   .finally(() => prisma.$disconnect());

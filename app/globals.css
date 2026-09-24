@@ -1,90 +1,323 @@
 @import "tailwindcss";
 
-/* ── Relaxic. Токены из docs/03-BRANDBOOK.md ───────────────────────── */
+/* ══ Relaxic. Токены из docs/03-BRANDBOOK.md ═══════════════════════
+   Палитра как набор красок: у каждого цвета есть номер.
+   Пропорция 60% Уголь · 25% Холст · 10% нейтрали · 5% Сурик.
+   Если Сурика стало больше — интерфейс начал спорить с товаром.
+   ═══════════════════════════════════════════════════════════════ */
 @theme {
-  --color-ink:        #141110;
+  --color-ink:        #141110;   /* 01 Уголь  */
   --color-ink-2:      #1E1917;
   --color-ink-3:      #2A2321;
-  --color-canvas:     #F6F1E8;
+  --color-canvas:     #F6F1E8;   /* 02 Холст  */
   --color-canvas-2:   #EDE6DA;
-  --color-surik:      #E8482B;
-  --color-surik-deep: #CE3114;
-  --color-ultramarin: #2B4BE8;
-  --color-turquoise:  #1FB8A0;
-  --color-ochre:      #E9B949;
-  --color-fog:        #9A9088;
+  --color-surik:      #E8482B;   /* 03 Сурик  */
+  --color-surik-deep: #CE3114;   /* белый на нём 5,15:1 — для бейджей на фото */
+  --color-amethyst:   #9D86D7;   /* 04 Аметист — ТОЛЬКО на тёмном (на Холсте 2,73:1) */
+  --color-amethyst-d: #7956D0;   /* его светлый двойник, 4,60:1 на Холсте */
+  --color-turquoise:  #1FB8A0;   /* 05 Бирюза */
+  --color-ochre:      #E9B949;   /* 06 Охра   */
+  --color-fog:        #9A9088;   /* 07 Туман  */
+  --color-danger:     #D93025;
+
+  /* Пастели из подложки логотипа. Только фон, только на светлом. */
+  --color-lavender:   #E2DAFD;
+  --color-mint:       #C9F2EF;
+  --color-sky:        #CAE8F7;
 
   --font-display: "Unbounded", system-ui, sans-serif;
   --font-text:    "Onest", system-ui, sans-serif;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in:  cubic-bezier(0.4, 0, 1, 1);
+
+  --radius-chip: 4px;
+  --radius-ui:   8px;
+  --radius-card: 16px;
+  --radius-blk:  24px;
 }
 
 :root {
   --bg: var(--color-ink);
   --surface: var(--color-ink-2);
+  --surface-2: #241E1C;
   --border: var(--color-ink-3);
   --text: var(--color-canvas);
   --text-muted: var(--color-fog);
   --accent: var(--color-surik);
-  /* Уголь, а не белый: 4.83:1 против 3.89:1. См. бренд-бук, раздел 3. */
+  --accent-2: var(--color-amethyst);
+  /* Уголь, а не белый: 4,83:1 против 3,89:1. Бренд-бук, раздел 3. */
   --accent-contrast: var(--color-ink);
+  --shadow-card: 0 18px 40px -24px rgb(0 0 0 / 0.85);
 }
 
-/* Светлая рабочая поверхность: фильтры, корзина, чекаут */
+/* Светлая рабочая поверхность: корзина, чекаут, фильтры */
 [data-surface="light"] {
   --bg: var(--color-canvas);
   --surface: #FFFFFF;
+  --surface-2: var(--color-canvas-2);
   --border: #DDD4C6;
   --text: var(--color-ink);
   --text-muted: #6E655D;
+  --accent-2: var(--color-amethyst-d);
   --accent-contrast: var(--color-ink);
+  --shadow-card: 0 18px 40px -28px rgb(20 17 16 / 0.35);
 }
 
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+/* Слои каскада: утилиты Tailwind должны побеждать мои классы.
+   Без этого .h1 { font-size: clamp(2rem,4.6vw,3rem) } перебивал
+   text-[1.125rem] на той же специфичности — просто потому, что идёт ниже. */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-text);
-  font-synthesis-weight: none;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    /* Шапка липкая: якоря не должны уезжать под неё */
+    scroll-padding-top: 88px;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-text);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* Страховка от горизонтального скролла на 320px */
+    overflow-x: hidden;
+  }
 }
 
-h1, h2, .display { font-family: var(--font-display); letter-spacing: -0.02em; }
+@layer components {
+  /* ── Типографическая шкала ───────────────────────────────────── */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.5rem, 6.4vw, 4.5rem);
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+  }
+  .h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2rem, 4.6vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.5rem, 3.2vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+  .h3 {
+    font-family: var(--font-text);
+    font-weight: 700;
+    font-size: 1.375rem;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+  .caption {
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  h1, h2, h3, h4 { margin: 0; }
+  p { margin: 0; }
 
-/* Цены не должны «прыгать» в списке */
-.tnum { font-variant-numeric: tabular-nums; }
+  /* Цены не должны «прыгать» в списке */
+  .tnum { font-variant-numeric: tabular-nums; }
 
-/* Контекстные ссылки: заметные, но не кричащие. Бренд-бук, раздел 6. */
-.prose a {
-  color: inherit;
-  text-decoration: underline;
-  text-decoration-color: color-mix(in oklab, var(--accent) 35%, transparent);
-  text-underline-offset: 0.22em;
-  text-decoration-thickness: 1px;
-  transition: text-decoration-color var(--t, 180ms), color 180ms;
+  /* Длина строки 62–72 знака: шире — глаз теряет строку */
+  .measure { max-width: 68ch; }
+  .measure-narrow { max-width: 56ch; }
+
+  /* ── Контейнер и ритм ────────────────────────────────────────── */
+  .container-x {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 16px;
+  }
+  @media (min-width: 768px) { .container-x { padding-inline: 24px; } }
+
+  .section { padding-block: 64px; }
+  @media (min-width: 1024px) { .section { padding-block: 96px; } }
+
+  /* ── Кнопки ──────────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 52px;
+    padding-inline: 24px;
+    border-radius: var(--radius-ui);
+    border: 1px solid transparent;
+    font-family: var(--font-text);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out),
+                border-color 150ms var(--ease-out), transform 150ms var(--ease-out);
+  }
+  @media (min-width: 1024px) { .btn { min-height: 48px; } }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-primary { background: var(--accent); color: var(--accent-contrast); }
+  .btn-primary:hover:not(:disabled) { background: #F2573B; }
+
+  .btn-secondary { background: transparent; color: var(--text); border-color: var(--border); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--text-muted); background: color-mix(in oklab, var(--text) 5%, transparent); }
+
+  .btn-ghost { background: transparent; color: var(--text-muted); padding-inline: 12px; }
+  .btn-ghost:hover:not(:disabled) { color: var(--text); }
+
+  .btn-sm { min-height: 40px; padding-inline: 16px; font-size: 0.875rem; }
+
+  /* Иконочная кнопка: область нажатия 44×44 минимум */
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out);
+  }
+  .btn-icon:hover { background: color-mix(in oklab, var(--text) 8%, transparent); }
+
+  /* ── Поля ────────────────────────────────────────────────────── */
+  .field {
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 16px;
+    border-radius: var(--radius-ui);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    /* 16px обязательно: меньше — iOS зумит страницу при фокусе */
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 150ms var(--ease-out);
+  }
+  .field::placeholder { color: var(--text-muted); }
+  .field:focus { outline: none; border-color: var(--accent); }
+  .field[aria-invalid="true"] { border-color: var(--color-danger); }
+
+  /* ── Карточки и чипсы ────────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    transition: transform 150ms var(--ease-out), border-color 150ms var(--ease-out),
+                box-shadow 150ms var(--ease-out);
+  }
+  /* Наведение: подъём и тень. Без зума и наклона — бренд-бук, раздел 7. */
+  @media (hover: hover) {
+    .card-lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-card); border-color: color-mix(in oklab, var(--text) 18%, var(--border)); }
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding-inline: 12px;
+    border-radius: var(--radius-chip);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 150ms var(--ease-out);
+  }
+  .chip:hover { color: var(--text); border-color: var(--text-muted); }
+  .chip[data-on="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); font-weight: 600; }
+
+  /* Номер краски перед названием — фирменный приём */
+  .paint-no {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    opacity: 0.55;
+  }
+
+  /* ── Ссылки в тексте: заметные, но не кричащие ───────────────── */
+  .prose a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, var(--accent) 35%, transparent);
+    text-underline-offset: 0.22em;
+    text-decoration-thickness: 1px;
+    transition: text-decoration-color 180ms, color 180ms;
+  }
+  .prose a:hover {
+    color: var(--accent);
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+  }
+  .prose p { margin-block: 0 1.1em; line-height: 1.65; }
+  .prose h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.375rem, 2.6vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    margin-block: 2em 0.7em;
+  }
+  .prose h2:first-child { margin-top: 0; }
+
+  /* Навигационные ссылки — без подчёркивания, реагируют цветом */
+  .nav-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 150ms var(--ease-out);
+  }
+  .nav-link:hover, .nav-link[aria-current="page"] { color: var(--text); }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Скрыто визуально, но доступно скринридеру */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
 }
-.prose a:hover {
-  color: var(--accent);
-  text-decoration-color: var(--accent);
-  text-decoration-thickness: 2px;
-}
 
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
+/* ── Движение ────────────────────────────────────────────────── */
 
-/* Фирменная анимация «Раскрашивание»: контур → цвет, сектор за сектором */
+/* Фирменная анимация «Раскрашивание»: контур → цвет, сектор за сектором.
+   Строго дозированно: hero, обложки вселенных, экран после заказа. */
 @keyframes paint-in {
   from { clip-path: inset(0 100% 0 0); opacity: .35; }
   to   { clip-path: inset(0 0 0 0);    opacity: 1; }
 }
 .paint-in { animation: paint-in 700ms var(--ease-out) both; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+.rise { animation: rise 250ms var(--ease-out) both; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -93,4 +326,9 @@ h1, h2, .display { font-family: var(--font-display); letter-spacing: -0.02em; }
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
+}
+
+/* Тонкая полоса прокрутки на тёмном — иначе белый брусок рвёт витрину */
+@supports (scrollbar-color: red blue) {
+  :root { scrollbar-color: var(--color-ink-3) transparent; scrollbar-width: thin; }
 }

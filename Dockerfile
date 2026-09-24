@@ -39,6 +39,8 @@ RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
 COPY prisma.config.ts next.config.ts ./
 COPY scripts ./scripts
+# lib/ нужен не сборке, а рантайму: prisma/seed.mjs читает lib/data/catalog.mjs
+COPY lib ./lib
 COPY public ./public
 COPY --from=build /app/.next ./.next
 

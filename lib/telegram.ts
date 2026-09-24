@@ -17,7 +17,9 @@ import { prisma } from "./db";
  */
 
 const API = "https://api.telegram.org";
-const TIMEOUT_MS = 8000;
+// 8 секунд на вызов было много: в цепочке их несколько, и чекаут вставал
+// на полминуты, когда api.telegram.org недоступен.
+const TIMEOUT_MS = 4000;
 
 function token(): string | null {
   return process.env.TELEGRAM_BOT_TOKEN || null;

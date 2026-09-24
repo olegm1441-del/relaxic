@@ -133,16 +133,20 @@ model Order {
   createdAt DateTime @default(now())
 }
 
+// Позиция заказа — снимок на момент покупки, а не ссылка на каталог.
+// productId необязателен намеренно: если набор снимут с продажи или сид
+// не успеет отработать, заказ всё равно должен записаться.
 model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  title     String
-  size      String
-  price     Int
-  qty       Int
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  productSlug String
+  title       String
+  size        String
+  price       Int
+  qty         Int
 }
 
 model Review {
@@ -166,6 +170,8 @@ model Article {
   content           String
   category          ArticleCategory
   coverUrl          String?
+  videoUrl          String?                          // MP4 или эмбед YouTube / VK
+  videoPoster       String?                          // постер обязателен: без него CLS
   readMinutes       Int             @default(5)
   relatedProductIds String[]
   publishedAt       DateTime?
