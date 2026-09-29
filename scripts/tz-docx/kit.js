@@ -59,6 +59,7 @@ const bullets = (items, o = {}) => items.map((t) => new Paragraph({
 }));
 
 function T(head, rows, weights, o = {}) {
+  const cellSize = o.size ?? 24;   // 12 пт по умолчанию, обложка просит 9
   const tot = weights.reduce((a, b) => a + b, 0);
   const cols = weights.map((w) => Math.round(w / tot * W));
   cols[cols.length - 1] = W - cols.slice(0, -1).reduce((a, b) => a + b, 0);
@@ -75,7 +76,7 @@ function T(head, rows, weights, o = {}) {
     children: (Array.isArray(val) ? val : [val]).map((t) => new Paragraph({
       spacing: { before: 0, after: 0, line: 268 },
       children: typeof t === "string"
-        ? [run(t, { size: 24, bold: isHead, color: isHead ? CANVAS : INK })]
+        ? [run(t, { size: cellSize, bold: isHead, color: isHead ? CANVAS : INK })]
         : t,
     })),
   });

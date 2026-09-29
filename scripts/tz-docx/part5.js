@@ -61,7 +61,7 @@ const none = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
 
 const doc = new Document({
   creator: "Relaxic",
-  title: "Relaxic — техническое задание 3.0",
+  title: "Relaxic — техническое задание на разработку сайта",
   description: "Интернет-магазин наборов для творчества по вселенным",
   styles: {
     default: {
@@ -95,7 +95,7 @@ const doc = new Document({
         border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: RULE, space: 6 } },
         children: [
           run("RELAXIC", { size: 16, bold: true, color: INK, characterSpacing: 30 }),
-          run("   ·   Техническое задание 3.0", { size: 16, color: FOG }),
+          run("   ·   Техническое задание на сайт", { size: 16, color: FOG }),
         ],
       })] }),
     },
@@ -113,7 +113,7 @@ const doc = new Document({
   }],
 });
 
-const out = path.join(REPO, "docs", "Relaxic-TZ-3.0.docx");
+const out = path.join(REPO, "docs", "Relaxic-TZ-sait.docx");
 Packer.toBuffer(doc).then((buf) => {
   fs.writeFileSync(out, buf);
   console.log("готово:", out, Math.round(buf.length / 1024) + " КБ,", body.length, "элементов");
