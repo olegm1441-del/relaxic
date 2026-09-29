@@ -12,7 +12,7 @@ const FONT = "Arial", W = 9638;
 const run = (t, o = {}) => new TextRun({ text: t, font: FONT, ...o });
 
 function P(text, o = {}) {
-  const { size = 20, color = INK, bold = false, italics = false, align,
+  const { size = 28, color = INK, bold = false, italics = false, align,
           before = 0, after = 130, line = 300, indent } = o;
   return new Paragraph({
     alignment: align, spacing: { before, after, line }, indent,
@@ -29,8 +29,8 @@ function H1(title, o = {}) {
       keepNext: true, keepLines: true,
       spacing: { before: o.first ? 0 : 540, after: 30 },
       children: [
-        run(String(state.no).padStart(2, "0") + "   ", { size: 28, bold: true, color: SURIK_D }),
-        run(title.toUpperCase(), { size: 28, bold: true, color: INK, characterSpacing: 12 }),
+        run(String(state.no).padStart(2, "0") + "   ", { size: 36, bold: true, color: SURIK_D }),
+        run(title.toUpperCase(), { size: 36, bold: true, color: INK, characterSpacing: 12 }),
       ],
     }),
     new Paragraph({
@@ -44,18 +44,18 @@ function H1(title, o = {}) {
 const H2 = (t) => new Paragraph({
   heading: HeadingLevel.HEADING_2, keepNext: true, keepLines: true,
   spacing: { before: 320, after: 120 },
-  children: [run(t, { size: 23, bold: true, color: INK })],
+  children: [run(t, { size: 32, bold: true, color: INK })],
 });
 const H3 = (t) => new Paragraph({
   keepNext: true, keepLines: true,
   spacing: { before: 240, after: 90 },
-  children: [run(t, { size: 20, bold: true, color: SURIK_D })],
+  children: [run(t, { size: 28, bold: true, color: SURIK_D })],
 });
 
 const bullets = (items, o = {}) => items.map((t) => new Paragraph({
   numbering: { reference: o.numbered ? "num" : "bul", level: 0 },
   spacing: { after: 70, line: 290 },
-  children: Array.isArray(t) ? t : [run(t, { size: 20, color: INK })],
+  children: Array.isArray(t) ? t : [run(t, { size: 28, color: INK })],
 }));
 
 function T(head, rows, weights, o = {}) {
@@ -75,7 +75,7 @@ function T(head, rows, weights, o = {}) {
     children: (Array.isArray(val) ? val : [val]).map((t) => new Paragraph({
       spacing: { before: 0, after: 0, line: 268 },
       children: typeof t === "string"
-        ? [run(t, { size: 18, bold: isHead, color: isHead ? CANVAS : INK })]
+        ? [run(t, { size: 24, bold: isHead, color: isHead ? CANVAS : INK })]
         : t,
     })),
   });
@@ -92,15 +92,15 @@ function Callout(title, body, tone = SURIK_D) {
   const none = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
   return new Table({
     columnWidths: [W], width: { size: W, type: WidthType.DXA },
-    rows: [new TableRow({ children: [new TableCell({
+    rows: [new TableRow({ cantSplit: true, children: [new TableCell({
       width: { size: W, type: WidthType.DXA },
       margins: { top: 180, bottom: 180, left: 230, right: 200 },
       shading: { type: ST.CLEAR, fill: CANVAS, color: "auto" },
       borders: { left: { style: BorderStyle.SINGLE, size: 26, color: tone }, top: none, bottom: none, right: none },
       children: [
-        ...(title ? [new Paragraph({ spacing: { after: 80 }, children: [run(title, { size: 20, bold: true, color: tone })] })] : []),
+        ...(title ? [new Paragraph({ spacing: { after: 80 }, children: [run(title, { size: 28, bold: true, color: tone })] })] : []),
         ...(Array.isArray(body) ? body : [body]).map((b) => new Paragraph({
-          spacing: { after: 70, line: 292 }, children: [run(b, { size: 19, color: INK })],
+          spacing: { after: 80, line: 300 }, children: [run(b, { size: 24, color: INK })],
         })),
       ],
     })] })],
@@ -111,14 +111,14 @@ function code(lines) {
   const none = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
   return new Table({
     columnWidths: [W], width: { size: W, type: WidthType.DXA },
-    rows: [new TableRow({ children: [new TableCell({
+    rows: [new TableRow({ cantSplit: true, children: [new TableCell({
       width: { size: W, type: WidthType.DXA },
       margins: { top: 160, bottom: 160, left: 190, right: 160 },
       shading: { type: ST.CLEAR, fill: "17120F", color: "auto" },
       borders: { top: none, bottom: none, left: none, right: none },
       children: lines.map((l) => new Paragraph({
         spacing: { after: 0, line: 255 },
-        children: [new TextRun({ text: l || " ", font: "Consolas", size: 17, color: "E7DFD3" })],
+        children: [new TextRun({ text: l || " ", font: "Consolas", size: 22, color: "E7DFD3" })],
       })),
     })] })],
   });
