@@ -84,7 +84,9 @@ export default function FaqPage() {
       <p className="prose measure mt-12 text-[var(--text-muted)]">
         Подробности про технику — в <Link href="/how-it-works">разборах</Link>, про сроки — в{" "}
         <Link href="/delivery">доставке</Link>, юридические условия — в{" "}
-        <Link href="/legal/offer">оферте</Link>.
+        <Link href="/legal/offer">оферте</Link>. Про cookie — в{" "}
+        <Link href="/legal/cookies">отдельной политике</Link>, про нас самих — в{" "}
+        <Link href="/about">разделе о компании</Link>.
       </p>
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />

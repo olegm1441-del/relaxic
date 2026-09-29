@@ -9,6 +9,8 @@ export interface Technique {
   title: string;
   one: string;
   short: string;
+  /** Для связок «Смотреть …», «Все …», «другие …»: short там не склеивается */
+  many: string;
   suffix: string;
   cover: string;
   box: string;

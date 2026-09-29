@@ -159,7 +159,7 @@ export default function Home() {
                   {/* Явное действие в каждой карточке: путь по технике должен
                       заканчиваться кнопкой, а не догадкой, что плитка кликабельна. */}
                   <span className="btn btn-card btn-sm mt-5 w-full">
-                    Смотреть {t.short}
+                    Смотреть {t.many}
                     <ArrowRight size={15} />
                   </span>
                 </div>
@@ -234,6 +234,11 @@ export default function Home() {
               );
             })}
           </div>
+          {/* Блок обещаний должен вести туда, где видно, кто их даёт */}
+          <p className="measure mt-6 text-[0.9375rem] text-[var(--text-muted)]">
+            Как мы рисуем схемы и почему считаем время в часах —{" "}
+            <Link href="/about" className="underline underline-offset-2">о компании</Link>.
+          </p>
         </Container>
       </section>
 

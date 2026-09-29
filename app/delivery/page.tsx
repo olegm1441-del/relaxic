@@ -88,7 +88,8 @@ export default function DeliveryPage() {
 
       <p className="prose measure mt-10 text-[var(--text-muted)]">
         Остальное — в <Link href="/faq">вопросах и ответах</Link>, условия целиком — в{" "}
-        <Link href="/legal/offer">публичной оферте</Link>. Не нашли ответ — звоните:{" "}
+        <Link href="/legal/offer">публичной оферте</Link>. Кто отправляет заказы —{" "}
+        <Link href="/about">о компании</Link>. Не нашли ответ — звоните:{" "}
         <a href={COMPANY.phoneHref}>{COMPANY.phone}</a>.
       </p>
     </Container>

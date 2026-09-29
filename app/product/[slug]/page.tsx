@@ -221,8 +221,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               Вселенная{" "}
               <Link href={`/fandom/${product.fandom}`}>{fandom?.title}</Link> —{" "}
               {fandom?.tagline.toLowerCase()}. Если хотите тот же сюжет медленнее или быстрее,
-              посмотрите <Link href={`/catalog/${tech.slug}`}>другие {tech.short}</Link> или{" "}
-              <Link href="/how-it-works">сравните три техники</Link>.
+              посмотрите <Link href={`/catalog/${tech.slug}`}>другие {tech.many}</Link> или{" "}
+              <Link href="/how-it-works">сравните три техники</Link>. Нужного кадра нет
+              в каталоге — <Link href="/custom">сделаем набор по вашей картинке</Link>.
             </p>
           </div>
         </section>

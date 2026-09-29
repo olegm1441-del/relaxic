@@ -88,7 +88,7 @@ export default async function FandomPage({ params }: { params: Promise<{ slug: s
               title={`${fandom.title} — ${tech.title.toLowerCase()}`}
               lead={tech.tagline}
               href={`/catalog/${tech.slug}?fandom=${slug}`}
-              hrefLabel={`Все ${tech.short}`}
+              hrefLabel={`Все ${tech.many}`}
             />
             <ProductGrid products={items} />
           </section>

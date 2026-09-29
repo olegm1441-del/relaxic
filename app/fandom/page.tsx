@@ -32,7 +32,9 @@ export default function FandomHub() {
         <p className="measure mt-4 text-[1.0625rem] text-[var(--text-muted)]">
           Обычно выбирают не технику, а героя. Здесь — от героя: откройте вселенную
           и посмотрите, в каком исполнении её можно собрать.{" "}
-          <Link href="/catalog" className="underline underline-offset-2">Или начните с техники</Link>.
+          <Link href="/catalog" className="underline underline-offset-2">Или начните с техники</Link>.{" "}
+          Вашей вселенной здесь нет —{" "}
+          <Link href="/custom" className="underline underline-offset-2">соберём набор по вашему кадру</Link>.
         </p>
       </header>
 
