@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OrderTracked } from "@/components/cart/OrderTracked";
 import Image from "next/image";
 import { Check } from "lucide-react";
 import { Container } from "@/components/ui";
@@ -28,6 +29,20 @@ export default async function OrderPage({ params }: { params: Promise<{ number: 
   return (
     <Container className="py-12 lg:py-20">
       <div className="mx-auto max-w-2xl text-center">
+        {/* Заказа может не быть: база недоступна или номер чужой.
+            Тогда страница всё равно рисуется, но покупку слать нечего. */}
+        {order && (
+          <OrderTracked
+            number={order.number}
+            revenue={order.total / 100}
+            items={order.items.map((i) => ({
+              id: i.productSlug,
+              name: i.title,
+              price: i.price / 100,
+              quantity: i.qty,
+            }))}
+          />
+        )}
         <div className="paint-in mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-turquoise)]">
           <Check size={40} className="text-[var(--color-ink)]" strokeWidth={3} />
         </div>

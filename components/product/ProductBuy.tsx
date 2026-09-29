@@ -6,6 +6,7 @@ import { Check, ShoppingBag, Truck } from "lucide-react";
 import { useCart, useCartReady, itemsTotal, toFreeDelivery } from "@/components/cart/store";
 import { price } from "@/lib/format";
 import type { Product, Size } from "@/lib/catalog";
+import { GOALS, track, pushAddToCart } from "@/lib/track";
 
 export function ProductBuy({
   product, sizes, techniqueTitle, fandomTitle,
@@ -42,6 +43,14 @@ export function ProductBuy({
     });
     setDone(true);
     setTimeout(() => setDone(false), 1400);
+    track(GOALS.ADD_TO_CART, { товар: product.slug, размер: size });
+    pushAddToCart({
+      id: `${product.slug}-${size}`,
+      name: `${product.title} — ${techniqueTitle}, ${size}`,
+      price: current / 100,
+      quantity: 1,
+      brand: fandomTitle,
+    });
   }
 
   return (

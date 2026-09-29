@@ -1,5 +1,7 @@
 "use client";
 
+import { GOALS, track } from "@/lib/track";
+
 import { useState, useTransition } from "react";
 import { AlertCircle, Check } from "lucide-react";
 import { submitCustom } from "@/lib/actions/custom";
@@ -45,7 +47,7 @@ export function CustomForm() {
         size: String(fd.get("size") ?? ""),
         comment: String(fd.get("comment") ?? ""),
       });
-      if (res.ok) setSent(true);
+      if (res.ok) { setSent(true); track(GOALS.CUSTOM_SENT); }
       else { setErrors(res.errors); setFormError(res.message ?? null); }
     });
   }

@@ -11,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
         // Служебное и транзакционное индексировать нечего.
         // Страницы с фасетами закрыты через generateMetadata: noindex, follow —
         // так ссылки на карточки всё равно обходятся.
-        disallow: ["/cart", "/checkout", "/order/", "/account", "/search", "/api/"],
+        disallow: ["/cart", "/checkout", "/order/", "/account", "/search", "/admin", "/api/"],
       },
     ],
     sitemap: `${base}/sitemap.xml`,

@@ -1,8 +1,10 @@
 "use client";
 
+import { GOALS, track } from "@/lib/track";
+
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
 import { ProductGrid } from "@/components/catalog/ProductCard";
 import type { Product } from "@/lib/catalog";
@@ -72,6 +74,16 @@ export function Quiz({ products }: { products: Product[] }) {
   const done = step >= STEPS.length;
   const result = done ? pick(products, answers) : [];
 
+  // Цель уходит один раз за прохождение: «Пройти заново» сбрасывает step,
+  // и без этой защиты каждый повтор считался бы новой конверсией.
+  const finished = useRef(false);
+  useEffect(() => {
+    if (!done) { finished.current = false; return; }
+    if (finished.current) return;
+    finished.current = true;
+    track(GOALS.QUIZ_DONE, { подобрано: result.length });
+  }, [done, result.length]);
+
   if (done) {
     const params = new URLSearchParams();
     if (answers.time) params.set("hours", answers.time);
@@ -132,6 +144,9 @@ export function Quiz({ products }: { products: Product[] }) {
             type="button"
             className="card card-lift p-5 text-left"
             onClick={() => {
+              // Первый ответ = начало подбора. Открытие страницы началом
+              // не считаем: на неё заходят и уходят, не ответив.
+              if (step === 0) track(GOALS.QUIZ_START);
               setAnswers((v) => ({ ...v, [s.key]: o.value }));
               setStep((n) => n + 1);
             }}

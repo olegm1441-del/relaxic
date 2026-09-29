@@ -1,4 +1,5 @@
 "use client";
+import { GOALS, track } from "@/lib/track";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -153,7 +154,11 @@ export function CartPageView({ topUp }: { topUp: Product[] }) {
               <span className="font-semibold">Итого</span>
               <span className="tnum text-[1.5rem] font-bold">{price(total + delivery)}</span>
             </div>
-            <Link href="/checkout" className="btn btn-primary mt-5 w-full">
+            <Link
+              href="/checkout"
+              className="btn btn-primary mt-5 w-full"
+              onClick={() => track(GOALS.CHECKOUT_OPEN, { позиций: lines.length })}
+            >
               <ShoppingBag size={18} />
               Оформить заказ
             </Link>
