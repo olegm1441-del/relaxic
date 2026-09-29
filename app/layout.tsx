@@ -6,6 +6,7 @@ import { Header, type MenuTechnique } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { CookieBar } from "@/components/site/CookieBar";
 import { Analytics } from "@/components/site/Analytics";
+import { METRIKA_ID } from "@/lib/company";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { TECHNIQUES, fandomsForTechnique } from "@/lib/catalog";
 import { COMPANY } from "@/lib/company";
@@ -92,7 +93,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Footer />
         <CartDrawer />
         <CookieBar />
-        <Analytics id={process.env.NEXT_PUBLIC_YANDEX_METRIKA_ID} />
+        <Analytics id={METRIKA_ID} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
