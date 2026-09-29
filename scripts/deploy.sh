@@ -184,12 +184,29 @@ trap 'git checkout -- public/build.json 2>/dev/null || true' EXIT
 
 # ── Заливка ──────────────────────────────────────────────────
 b ""; b "  заливаю код напрямую (3–6 минут)"; b ""
-railway up -c 2>&1 | tee "$LOG"
-BUILD=${PIPESTATUS[0]}
+
+# Папка с картинками весит под семьдесят мегабайт, и заливка иногда рвётся
+# на полпути: «Connection reset by peer». Повторяем — но только обрыв связи.
+# Упавшую сборку повторять бессмысленно, со второго раза она не соберётся.
+BUILD=1
+for try in 1 2 3; do
+  if [ "$try" -gt 1 ]; then
+    wa "связь оборвалась, попытка $try из 3"
+    sleep $((try * 10))
+  fi
+  railway up -c 2>&1 | tee "$LOG"
+  BUILD=${PIPESTATUS[0]}
+  [ "$BUILD" -eq 0 ] && break
+  grep -qiE "connection (reset|error)|SendRequest|timed out|broken pipe|os error 54" "$LOG" || break
+done
 
 b ""
 if [ "$BUILD" -ne 0 ]; then
   no "сборка не прошла"
+  if grep -qiE "connection (reset|error)|SendRequest|os error 54" "$LOG"; then
+    d "  связь рвалась все три раза. Заливается ~70 МБ — попробуйте с другой"
+    d "  сети или через телефон раздачей, это почти всегда помогает."
+  fi
   b ""; d "  последние 40 строк — пришлите их в чат:"; d "  ──────────────────────────────"
   tail -40 "$LOG"; d "  ──────────────────────────────"
   exit 1
