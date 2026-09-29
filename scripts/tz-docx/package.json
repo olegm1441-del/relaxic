@@ -1,0 +1,7 @@
+{
+  "name": "relaxic-tz-docx",
+  "private": true,
+  "description": "Сборка технического задания в .docx. Отдельный package.json намеренно: генератору документа не место в зависимостях сайта.",
+  "scripts": { "build": "node part5.js" },
+  "dependencies": { "docx": "^9.8.1" }
+}

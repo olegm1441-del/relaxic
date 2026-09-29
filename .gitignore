@@ -21,3 +21,6 @@ tsconfig.tsbuildinfo
 
 # Локальная привязка к проекту Railway — у каждого своя
 /.deploy.local
+
+# Генератор ТЗ ставит docx себе, в зависимости сайта он не попадает
+/scripts/tz-docx/node_modules/
