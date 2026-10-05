@@ -6,6 +6,7 @@ import { Header, type MenuTechnique } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { CookieBar } from "@/components/site/CookieBar";
 import { Analytics } from "@/components/site/Analytics";
+import { ErrorReporter } from "@/components/site/ErrorReporter";
 import { METRIKA_ID } from "@/lib/company";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { TECHNIQUES, fandomsForTechnique } from "@/lib/catalog";
@@ -94,6 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CartDrawer />
         <CookieBar />
         <Analytics id={METRIKA_ID} />
+        <ErrorReporter />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}

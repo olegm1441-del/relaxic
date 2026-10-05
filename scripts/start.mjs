@@ -42,7 +42,7 @@ if (process.env.DATABASE_URL) {
  * держится в разы меньшего объёма. Ставим, только если не задано снаружи.
  */
 if (!process.env.NODE_OPTIONS?.includes("max-old-space-size")) {
-  process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ""} --max-old-space-size=384`.trim();
+  process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ""} --max-old-space-size=640`.trim();
 }
 
 const port = process.env.PORT || "3000";

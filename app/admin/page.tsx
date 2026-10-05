@@ -5,6 +5,7 @@ import { AutoRefresh } from "@/components/admin/AutoRefresh";
 import { adminSignIn, adminSignOut } from "@/lib/actions/admin";
 import { ADMIN_COOKIE } from "@/lib/admin";
 import { metrikaStats } from "@/lib/metrika";
+import { listClientErrors } from "@/lib/client-errors";
 import { prisma } from "@/lib/db";
 import { price } from "@/lib/format";
 import { GOALS } from "@/lib/track";
@@ -126,6 +127,7 @@ export default async function AdminPage({
   const multi = orders.filter((o) => o._count.items > 1).length;
   const failed = orders.filter((o) => o.notifyError).length;
 
+  const clientErrors = listClientErrors();
   const { data: ym, error: ymError } = await metrikaStats();
   const goal = (key: string) => ym?.goals.find((g) => g.key === key)?.reaches ?? 0;
 
@@ -236,6 +238,45 @@ export default async function AdminPage({
             </p>
           </div>
         )}
+      </section>
+
+      <section className="mt-12">
+        <h2 className="h3">Ошибки в браузере</h2>
+        <p className="mt-2 text-[0.9375rem] text-[var(--text-muted)]">
+          Приходят со страниц покупателей. Список живёт в памяти сервера: если он
+          пуст после того, как ошибка точно была, значит сервер перезапускался.
+        </p>
+        <div className="card mt-4 overflow-x-auto">
+          <table className="w-full text-[0.9375rem]">
+            <thead>
+              <tr className="border-b border-[var(--border)] text-left text-[0.8125rem] text-[var(--text-muted)]">
+                <th className="p-4 font-medium">Когда</th>
+                <th className="p-4 font-medium">Вид</th>
+                <th className="p-4 font-medium">Сообщение</th>
+                <th className="p-4 font-medium">Где</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clientErrors.length === 0 && (
+                <tr><td colSpan={4} className="p-4 text-[var(--text-muted)]">Ошибок не приходило.</td></tr>
+              )}
+              {clientErrors.slice(0, 20).map((e, i) => (
+                <tr key={e.at + i} className="border-b border-[var(--border)] last:border-0 align-top">
+                  <td className="tnum p-4 text-[0.8125rem] text-[var(--text-muted)]">
+                    {new Date(e.at).toLocaleTimeString("ru-RU")}
+                  </td>
+                  <td className="p-4 text-[0.8125rem]">
+                    {e.kind === "chunk" ? "старая сборка" : e.kind === "rejection" ? "обещание" : "исключение"}
+                  </td>
+                  <td className="p-4 text-[0.8125rem]">{e.message}</td>
+                  <td className="p-4 text-[0.8125rem] text-[var(--text-muted)]">
+                    {e.url.replace(/^https?:\/\/[^/]+/, "")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section className="mt-12">
