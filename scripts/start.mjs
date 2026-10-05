@@ -35,6 +35,16 @@ if (process.env.DATABASE_URL) {
   console.warn("! DATABASE_URL не задан — поднимаюсь без базы");
 }
 
+/**
+ * Потолок кучи. Без него V8 растит процесс, пока есть свободная память
+ * машины, и не отдаёт её обратно — а Railway считает деньги по памяти
+ * поминутно. С потолком сборщик мусора включается раньше, и процесс
+ * держится в разы меньшего объёма. Ставим, только если не задано снаружи.
+ */
+if (!process.env.NODE_OPTIONS?.includes("max-old-space-size")) {
+  process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ""} --max-old-space-size=384`.trim();
+}
+
 const port = process.env.PORT || "3000";
 console.log(`→ старт на 0.0.0.0:${port}`);
 const code = await run("npx", ["next", "start", "-H", "0.0.0.0", "-p", port]);

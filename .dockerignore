@@ -7,3 +7,5 @@ docs
 *.log
 .DS_Store
 tsconfig.tsbuildinfo
+# Оригиналы картинок на сервере не нужны: туда уезжает только public/img
+assets
