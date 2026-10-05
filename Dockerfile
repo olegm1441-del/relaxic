@@ -43,6 +43,12 @@ COPY scripts ./scripts
 COPY lib ./lib
 COPY public ./public
 COPY --from=build /app/.next ./.next
+# Кеш сборщика (порядка 120 МБ) в готовом образе не нужен ни на байт:
+# он нужен только повторной сборке, а здесь занимает место на диске
+# и место в файловом кеше ядра — а его Railway считает как память.
+RUN rm -rf .next/cache
 
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+# Напрямую, не через npm: обёртка npm висит рядом с сервером
+# всё время работы и держит под 90 МБ впустую.
+CMD ["node", "scripts/start.mjs"]

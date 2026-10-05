@@ -3,9 +3,10 @@
   dockerfilePath = "Dockerfile"
 
 [deploy]
-  # db push, а не migrate deploy: истории миграций ещё нет
-  preDeployCommand = "npx prisma db push && npm run db:seed"
-  startCommand = "npm run start"
+  # Схему и демо-данные накатывает scripts/start.mjs — отдельный
+  # preDeployCommand делал ту же работу второй раз, поднимая на каждом
+  # выкате ещё один процесс Prisma под четверть гигабайта.
+  startCommand = "node scripts/start.mjs"
   healthcheckPath = "/api/health"
   healthcheckTimeout = 300
   restartPolicyType = "ON_FAILURE"
