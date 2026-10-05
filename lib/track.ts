@@ -40,11 +40,17 @@ function w(): W | null {
   return typeof window === "undefined" ? null : (window as unknown as W);
 }
 
-/** Отправить цель. Без согласия — ничего не делает. */
+/**
+ * Отправить цель. Без согласия — ничего не делает.
+ *
+ * Проверяем именно тип: window.ym может оказаться не функцией, а чем
+ * угодно — например, DOM-элементом, если на странице есть тег с таким id.
+ * И оборачиваем в try: сбой аналитики не повод ломать сайт.
+ */
 export function track(goal: Goal, params?: Record<string, unknown>) {
   const g = w();
-  if (!g?.ym || !g.__ymId) return;
-  g.ym(g.__ymId, "reachGoal", goal, params);
+  if (typeof g?.ym !== "function" || !g.__ymId) return;
+  try { g.ym(g.__ymId, "reachGoal", goal, params); } catch { /* не мешаем работе */ }
 }
 
 export interface EcomItem { id: string; name: string; price: number; quantity: number; brand?: string }
@@ -58,7 +64,7 @@ export interface EcomItem { id: string; name: string; price: number; quantity: n
  */
 export function pushPurchase(orderNumber: string, items: EcomItem[], revenue: number) {
   const g = w();
-  if (!g?.dataLayer) return;
+  if (!Array.isArray(g?.dataLayer)) return;
   g.dataLayer.push({
     ecommerce: {
       currencyCode: "RUB",
@@ -69,6 +75,6 @@ export function pushPurchase(orderNumber: string, items: EcomItem[], revenue: nu
 
 export function pushAddToCart(item: EcomItem) {
   const g = w();
-  if (!g?.dataLayer) return;
+  if (!Array.isArray(g?.dataLayer)) return;
   g.dataLayer.push({ ecommerce: { currencyCode: "RUB", add: { products: [item] } } });
 }

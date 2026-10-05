@@ -50,14 +50,21 @@ export function Analytics({ id }: { id?: string }) {
     if (prev.current === null) { prev.current = url; return; }
     const from = prev.current;
     prev.current = url;
-    const ym = (window as unknown as { ym?: (...a: unknown[]) => void }).ym;
-    ym?.(Number(id), "hit", url, { referer: from });
+    // Ошибка счётчика не должна ронять переход: исключение из эффекта
+    // во время навигации ломает роутер, и браузер показывает свою
+    // страницу ошибки вместо сайта.
+    try {
+      const ym = (window as unknown as { ym?: unknown }).ym;
+      if (typeof ym === "function") {
+        (ym as (...a: unknown[]) => void)(Number(id), "hit", url, { referer: from });
+      }
+    } catch { /* аналитика молчит, сайт работает */ }
   }, [pathname, id, allowed]);
 
   if (!id || !allowed) return null;
 
   return (
-    <Script id="ym" strategy="afterInteractive">{`
+    <Script id="metrika-counter" strategy="afterInteractive">{`
       window.dataLayer = window.dataLayer || [];
       window.__ymId = ${JSON.stringify(Number(id))};
       (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
