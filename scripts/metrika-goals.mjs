@@ -98,8 +98,8 @@ if (!TOKEN) {
   no("нет токена");
   console.log(dim("\n  Где взять, две минуты:"));
   console.log(dim("  1. https://oauth.yandex.ru/client/new/ → имя любое,"));
-  console.log(dim("     платформа «Веб-сервисы», Redirect URI — кнопка"));
-  console.log(dim("     «Подставить URL для разработки»."));
+  console.log(dim("     платформа «Веб-сервисы». В поле Redirect URI нажмите"));
+  console.log(dim("     ссылку, которая подставляет отладочный адрес Яндекса."));
   console.log(dim("     В доступах найдите «Яндекс Метрика» и отметьте"));
   console.log(dim("     metrika:read и metrika:write. Создать."));
   console.log(dim("  2. Откройте в браузере, подставив ClientID приложения:"));
