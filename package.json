@@ -15,6 +15,7 @@
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.mjs",
     "db:studio": "prisma studio",
+    "metrika:goals": "node scripts/metrika-goals.mjs",
     "postinstall": "prisma generate"
   },
   "prisma": {
