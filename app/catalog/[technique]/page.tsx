@@ -24,7 +24,10 @@ export async function generateMetadata({
   if (!t) return {};
   const n = PRODUCTS.filter((p) => p.technique === t.key).length;
   return {
-    title: `${t.title} по вселенным кино, сериалов и игр`,
+    // «купить» стоит в самом частом запросе ниши («картины по номерам
+    // купить» — 15,5 тыс. показов в месяц), поэтому слово должно быть
+    // в заголовке, а не только в кнопке.
+    title: `Купить ${t.many} — наборы по вселенным кино, сериалов и игр`,
     description: `${t.tagline}. ${n} наборов, сложность и время сборки указаны честно. ${COMPANY.deliveryZone}.`,
     alternates: { canonical: `/catalog/${t.slug}` },
     openGraph: { title: t.title, description: t.tagline, images: [t.cover] },

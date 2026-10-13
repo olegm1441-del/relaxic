@@ -243,8 +243,6 @@ export function productsForArticle(a: Article): Product[] {
 export interface GalleryItem {
   url: string;
   author: string;
-  caption: string;
-  productSlug: string | null;
 }
 
 const GALLERY_AUTHORS = [
@@ -253,25 +251,36 @@ const GALLERY_AUTHORS = [
   "Сергей, Ростов", "Вера, Иркутск",
 ];
 
-/** Десять «крупных» работ + панели из наборов — на страницу галереи и в ленты */
+/**
+ * Снимки готовых работ для витрины.
+ *
+ * Раньше каждому снимку приписывался товар из каталога — PRODUCTS[hash(i) %
+ * длина], то есть случайный. Подпись и alt называли его сюжет, а ссылка вела
+ * на его карточку: человек кликал по мозаике с фонариками над ночным городом
+ * и попадал на «Ночь фейерверков», где нарисован японский фестиваль. Так же
+ * врал и alt — для поиска это прямое несоответствие картинки и текста.
+ *
+ * Сверка попиксельно: ни один из 125 снимков не совпал ни с одним из 15
+ * сюжетов каталога. Минимальное расхождение 28 из 255, у следующего сюжета —
+ * 29: выбор между ними был бы подбрасыванием монеты. Снимки рисовались
+ * отдельно от каталога, и связать их с товарами нечем.
+ *
+ * Поэтому не связываем. Галерея отвечает на вопрос «как это выглядит дома»
+ * и ведёт в каталог целиком — это правда, а ссылка на случайный товар
+ * правдой не была.
+ */
 export function galleryItems(limit = 40): GalleryItem[] {
   const out: GalleryItem[] = [];
   for (let i = 1; i <= 10; i++) {
-    const p = PRODUCTS[(hash(`work${i}`) % PRODUCTS.length)];
     out.push({
       url: `/img/gallery/work-${String(i).padStart(2, "0")}.jpg`,
       author: GALLERY_AUTHORS[(i - 1) % GALLERY_AUTHORS.length],
-      caption: p.title,
-      productSlug: p.slug,
     });
   }
   for (let i = 1; i <= limit - 10; i++) {
-    const p = PRODUCTS[(hash(`extra${i}`) % PRODUCTS.length)];
     out.push({
       url: `/img/extra/extra-${String(i).padStart(3, "0")}.jpg`,
       author: GALLERY_AUTHORS[i % GALLERY_AUTHORS.length],
-      caption: p.title,
-      productSlug: p.slug,
     });
   }
   return out;

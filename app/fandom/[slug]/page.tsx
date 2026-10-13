@@ -108,14 +108,14 @@ export default async function FandomPage({ params }: { params: Promise<{ slug: s
         <section className="mb-14">
           <SectionHead
             title="Как это выглядит дома"
-            lead="Работы покупателей: без студийного света и обработки."
+            lead="Работы покупателей в любой из техник — без студийного света и обработки."
             href="/gallery"
             hrefLabel="Вся галерея"
           />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {works.map((w, i) => (
               <div key={i} className="relative aspect-square overflow-hidden rounded-[var(--radius-ui)] bg-[var(--color-canvas-2)]">
-                <Image src={w.url} alt={`Работа: ${w.caption}`} fill sizes="(max-width: 640px) 45vw, 16vw" className="object-cover" />
+                <Image src={w.url} alt={`Готовая работа покупателя дома: ${w.author}`} fill sizes="(max-width: 640px) 45vw, 16vw" className="object-cover" />
               </div>
             ))}
           </div>

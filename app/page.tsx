@@ -11,7 +11,21 @@ import {
 import { COMPANY } from "@/lib/company";
 import { price, productsWord } from "@/lib/format";
 
+/**
+ * Заголовок и описание главной названы товаром, а не образом.
+ *
+ * Спрос в поиске лежит на трёх словосочетаниях: «картины по номерам»
+ * (160 тыс. показов в месяц), «алмазные мозаики» (146 тыс.) и «вышивка
+ * крестиком» (56 тыс.). Под «соберите свою вселенную» не ищет никто.
+ * Отдельная строка про «по фото» — это ещё 34 тыс. запросов, и у нас
+ * под них есть страница.
+ */
 export const metadata: Metadata = {
+  title: { absolute: "Картины по номерам, алмазные мозаики и вышивка крестиком — Relaxic" },
+  description:
+    "Наборы для творчества: картины по номерам на холсте и подрамнике, алмазные мозаики и " +
+    "вышивка крестиком по кадрам из кино, сериалов, игр и аниме. Или своя картина по фото. " +
+    "Доставка по России, от 5 000 ₽ бесплатно.",
   alternates: { canonical: "/" },
 };
 
@@ -58,11 +72,20 @@ export default function Home() {
             {/* До 1024px колонка уже контейнера: длинная строка плохо читается,
                 а правая треть остаётся под открытый кадр. */}
             <div className="relative flex min-h-[min(78svh,35rem)] max-w-[34rem] flex-col justify-center py-12 lg:min-h-[34rem] lg:max-w-none lg:py-24 lg:pr-12">
-              <h1 className="display max-w-[15ch]">Соберите свою вселенную</h1>
+              {/* Надзаголовок держит обещание бренда, заголовок — называет товар.
+                  Раньше первое, что видел человек, было «Соберите свою вселенную»:
+                  красиво, но из него не понять, что здесь продают, и в поиске
+                  по такой строке никто ничего не набирает. */}
+              <p className="text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-[rgb(246_241_232/0.58)] lg:text-[0.8125rem]">
+                Соберите свою вселенную
+              </p>
+              <h1 className="display mt-3 max-w-[17ch] text-[clamp(2.125rem,4.4vw,3.375rem)]">
+                Картины по номерам, алмазные мозаики и вышивка крестиком
+              </h1>
               <p className="measure mt-5 text-[1.0625rem] leading-relaxed text-[rgb(246_241_232/0.80)] lg:mt-6 lg:text-[1.1875rem]">
-                Картины по номерам, алмазные мозаики и вышивка по кадрам из кино,
-                сериалов и игр. У каждого набора указаны сложность и время сборки
-                в часах.
+                Наборы на холсте и на подрамнике — по кадрам из кино, сериалов, игр
+                и аниме. Или своя картина по фото: присылаете кадр, собираем набор
+                с нуля. У каждого указаны сложность и время сборки в часах.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Link href="/catalog" className="btn btn-primary">Смотреть каталог</Link>
@@ -169,11 +192,51 @@ export default function Home() {
         </Container>
       </section>
 
+      {/* ── Своя картина по фото ──
+           Третий по величине спрос в нише после самих техник: «картина
+           по номерам по фото» — 10 тыс. показов в месяц, «алмазная мозаика
+           по фото» — 9 тыс., и дальше по мелочи ещё столько же. Страница
+           под это у нас есть, а с главной на неё не вело ничего. */}
+      <section className="section pt-0">
+        <Container>
+          <div className="card grid items-center gap-8 overflow-hidden p-6 lg:grid-cols-[1fr_minmax(0,42%)] lg:gap-12 lg:p-10">
+            <div>
+              <p className="text-[0.75rem] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+                04 · На заказ
+              </p>
+              <h2 className="h2 mt-3 max-w-[18ch]">Своя картина по фото</h2>
+              <p className="measure mt-4 text-[1.0625rem] leading-relaxed text-[var(--text-muted)]">
+                Нужного кадра нет в каталоге — пришлите свой. Сделаем из него картину
+                по номерам, алмазную мозаику или вышивку крестиком: подойдёт постер,
+                скриншот из игры, кадр из сериала или ваша фотография.
+              </p>
+              <p className="measure mt-3 text-[0.9375rem] leading-relaxed text-[var(--text-muted)]">
+                Посмотрим кадр и честно скажем, выйдет ли из него набор. Посчитаем
+                палитру, пришлём превью с разметкой, соберём коробку за 7–10 дней.
+              </p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Link href="/custom" className="btn btn-primary">Прислать кадр</Link>
+                <Link href="/how-it-works" className="btn btn-secondary">Чем отличаются техники</Link>
+              </div>
+            </div>
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-blk)] bg-[var(--color-canvas-2)] lg:aspect-[4/5]">
+              <Image
+                src="/img/mood/workshop.jpg"
+                alt="Мастерская Relaxic: по присланному кадру собирают набор"
+                fill
+                sizes="(max-width: 1024px) 90vw, 42vw"
+                className="object-cover"
+              />
+            </div>
+          </div>
+        </Container>
+      </section>
+
       {/* ── Вселенные ── */}
       <section className="section pt-0">
         <Container>
           <SectionHead
-            no="04"
+            no="05"
             title="Вселенные"
             lead="Люди выбирают не технику, а героя. Начните отсюда, если точно знаете, что любите."
             href="/fandom"
@@ -216,7 +279,7 @@ export default function Home() {
       {/* ── Доверие ── */}
       <section className="section pt-0">
         <Container>
-          <SectionHead no="05" title="Почему у нас" lead="Четыре вещи, которых обычно не хватает, когда выбираешь набор." />
+          <SectionHead no="06" title="Почему у нас" lead="Четыре вещи, которых обычно не хватает, когда выбираешь набор." />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
               [Clock, "Честное время", "Время сборки указано в часах. 18 часов — это неделя по два вечера, и мы так и пишем."],
@@ -246,7 +309,7 @@ export default function Home() {
       <section className="section pt-0">
         <Container>
           <SectionHead
-            no="06"
+            no="07"
             title="Как это выглядит дома"
             lead="Работы покупателей. Без студийного света, как есть."
             href="/gallery"
@@ -256,12 +319,12 @@ export default function Home() {
             {works.map((w, i) => (
               <Link
                 key={i}
-                href={w.productSlug ? `/product/${w.productSlug}` : "/gallery"}
+                href="/gallery"
                 className="group relative aspect-square overflow-hidden rounded-[var(--radius-card)] bg-[var(--color-canvas-2)] no-underline"
               >
                 <Image
                   src={w.url}
-                  alt={`Работа покупателя: ${w.caption}`}
+                  alt={`Готовая работа покупателя дома, снято на телефон: ${w.author}`}
                   fill
                   sizes="(max-width: 640px) 45vw, 23vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
@@ -279,7 +342,7 @@ export default function Home() {
       <section className="section pt-0">
         <Container>
           <SectionHead
-            no="07"
+            no="08"
             title="Читать перед покупкой"
             lead="Разборы техник, истории покупателей и изнанка производства."
             href="/blog"
@@ -299,6 +362,47 @@ export default function Home() {
               </Link>
             ))}
           </div>
+        </Container>
+      </section>
+
+      {/* ── Частые запросы ──
+           Перелинковка с текстом ссылки, который совпадает с тем, как люди
+           ищут. Каждая ведёт на свою страницу — двух ссылок на один адрес
+           здесь нет, иначе вес размазывается, а человек ходит по кругу.
+           Фильтров, которые возвращают весь каталог целиком (размер лежит
+           в карточке товара, а не в фасете), здесь тоже нет: такая страница
+           была бы копией каталога. */}
+      <section className="section pt-0">
+        <Container>
+          <SectionHead
+            no="09"
+            title="Короткие дороги"
+            lead="То, за чем приходят чаще всего — без блужданий по фильтрам."
+          />
+          <ul className="flex flex-wrap gap-2.5">
+            {[
+              ["Картины по номерам на холсте", "/catalog/kartiny-po-nomeram"],
+              ["Алмазные мозаики на холсте", "/catalog/almaznaya-mozaika"],
+              ["Наборы для вышивки крестиком", "/catalog/vyshivka-krestikom"],
+              ["Картина по номерам по фото", "/custom"],
+              ["Картины по фильмам и сериалам", "/fandom"],
+              ["Наборы для начинающих", "/catalog?difficulty=1,2"],
+              ["Наборы на один-два вечера", "/catalog?hours=0-5,5-15"],
+              ["Детям от 6 лет", "/catalog?age=6"],
+              ["Набор в подарок", "/gifts"],
+              ["Чем отличаются три техники", "/how-it-works"],
+              ["Мозаика или картина по номерам", "/blog/mozaika-ili-nomera"],
+            ].map(([title, href]) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[0.9375rem] text-[var(--text)] no-underline transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                >
+                  {title}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </Container>
       </section>
 

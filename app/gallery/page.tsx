@@ -33,20 +33,20 @@ export default function GalleryPage() {
         {items.map((w, i) => (
           <Link
             key={i}
-            href={w.productSlug ? `/product/${w.productSlug}` : "/catalog"}
+            href="/catalog"
             className="group relative block break-inside-avoid overflow-hidden rounded-[var(--radius-card)] bg-[var(--color-canvas-2)] no-underline"
           >
             <Image
               src={w.url}
-              alt={`Работа покупателя: ${w.caption}`}
+              alt={`Готовая работа покупателя дома, снято на телефон: ${w.author}`}
               width={800}
               height={i % 3 === 0 ? 1000 : 600}
               sizes="(max-width: 640px) 48vw, (max-width: 1024px) 32vw, 24vw"
               className="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
             />
             <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[rgb(20_17_16/0.9)] to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
-              <span className="block text-[0.8125rem] font-semibold text-[var(--color-canvas)]">{w.caption}</span>
-              <span className="block text-[0.75rem] text-[color-mix(in_oklab,var(--color-canvas)_70%,transparent)]">{w.author}</span>
+              <span className="block text-[0.8125rem] font-semibold text-[var(--color-canvas)]">{w.author}</span>
+              <span className="block text-[0.75rem] text-[color-mix(in_oklab,var(--color-canvas)_70%,transparent)]">Смотреть каталог</span>
             </span>
           </Link>
         ))}
@@ -56,8 +56,8 @@ export default function GalleryPage() {
         <SectionHead
           title="Хотите так же?"
           lead="Начните с набора на один вечер — если не пойдёт, потеряете вечер, а не месяц."
-          href="/catalog?hours=0-5"
-          hrefLabel="Наборы на один вечер"
+          href="/catalog?hours=0-5,5-15"
+          hrefLabel="Наборы на один-два вечера"
         />
       </section>
 
