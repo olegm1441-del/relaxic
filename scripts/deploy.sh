@@ -119,9 +119,14 @@ fi
 CANDS=""
 if [ -z "$LINKED" ]; then
   CANDS="$(candidates)"
+  # Фигурные скобки обязательны. На macOS стоит bash 3.2, и он
+  # прихватывает первый байт закрывающей кавычки-ёлочки в имя
+  # переменной: имя получается на байт длиннее, такой переменной нет,
+  # и set -u валит скрипт с «cname?: unbound variable». Скобки явно
+  # закрывают имя, и разобрать его иначе уже невозможно.
   while IFS="$(printf '\t')" read -r cid cname; do
     [ -n "$cid" ] || continue
-    try_link "$cid" "проект «$cname»" && break
+    try_link "$cid" "проект «${cname:-$cid}»" && break
   done <<EOC
 $CANDS
 EOC
@@ -131,7 +136,7 @@ fi
 #    иначе один и тот же проект посчитается дважды, под id и под именем.
 if [ -z "$LINKED" ] && [ -z "$CANDS" ]; then
   for p in "${RELAXIC_PROJECT:-relaxic}" relaxic charismatic-courtesy; do
-    try_link "$p" "проект «$p»" && break
+    try_link "$p" "проект «${p}»" && break
   done
 fi
 
