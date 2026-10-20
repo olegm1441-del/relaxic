@@ -24,9 +24,22 @@ wa(){ printf "\033[33m  ! %s\033[0m\n" "$1"; }
 
 b ""; b "  RELAXIC ✕  развёртывание"; b ""
 
-command -v railway >/dev/null 2>&1 || { no "нет Railway CLI: npm i -g @railway/cli"; exit 1; }
-railway whoami >/dev/null 2>&1 || { no "не выполнен вход"; d "  railway login --browserless"; exit 1; }
-ok "вход выполнен"
+# ── Откуда Railway берёт код ─────────────────────────────────
+# direct — заливаем папку сами через railway up.
+# github — Railway забирает код из репозитория, с машины уходит только
+#   git push. Нужен там, где большой POST к backboard режет посредник:
+#   заливка падает мгновенно с «Connection reset by peer», хотя обычные
+#   запросы к тому же хосту проходят. Включается флагом --github или
+#   строкой RELAXIC_SOURCE=github в .deploy.local.
+[ -f "$STORE" ] && . "$STORE"
+SOURCE="${RELAXIC_SOURCE:-direct}"
+for a in "$@"; do [ "$a" = "--github" ] && SOURCE=github; done
+
+if [ "$SOURCE" != github ]; then
+  command -v railway >/dev/null 2>&1 || { no "нет Railway CLI: npm i -g @railway/cli"; exit 1; }
+  railway whoami >/dev/null 2>&1 || { no "не выполнен вход"; d "  railway login --browserless"; exit 1; }
+  ok "вход выполнен"
+fi
 
 # ── Код ──────────────────────────────────────────────────────
 # Раньше здесь стояло 2>/dev/null, и неудачный pull проходил молча —
@@ -43,12 +56,37 @@ fi
 WANT="$(git rev-parse --short=7 HEAD)"
 ok "код готов, коммит $WANT"
 
+# ── Сборка из GitHub ─────────────────────────────────────────
+if [ "$SOURCE" = github ]; then
+  b ""; b "  код на GitHub, собирает Railway"; b ""
+  d "  обычно 3–6 минут, ждём до десяти"
+  LIVE=""
+  # Число попыток вынесено наружу, чтобы ветку можно было прогнать
+  # за секунды, а не ждать десять минут на каждой проверке.
+  for _ in $(seq 1 "${RELAXIC_WAIT_TRIES:-60}"); do
+    LIVE="$(curl -s --max-time 10 "$URL/api/health" 2>/dev/null \
+            | sed -n 's/.*"commit":"\([^"]*\)".*/\1/p')"
+    [ "$LIVE" = "$WANT" ] && break
+    printf "."; sleep "${RELAXIC_WAIT_STEP:-10}"
+  done
+  echo; b ""
+  if [ "$LIVE" = "$WANT" ]; then
+    ok "на сайте коммит $LIVE — выкат доехал"
+    b ""; exit 0
+  fi
+  no "за десять минут на сайте всё ещё «${LIVE:-нет ответа}», ожидался $WANT"
+  d "  посмотреть сборку:  railway logs --build"
+  d "  сборки не было вовсе — источник сервиса не подключён:"
+  d "  railway service source connect --repo olegm1441-del/relaxic \\"
+  d "      --branch main --service $SERVICE"
+  b ""; exit 1
+fi
+
 # ── Привязка: проект + окружение + сервис ────────────────────
 # Проект в Railway переименовали (был charismatic-courtesy, стал relaxic),
 # и проектов с именем relaxic в аккаунте теперь два — по имени не выбрать.
 # Поэтому ищем по id и проверяем себя доменом: тот ли сервис под рукой.
 HOST="${URL#https://}"; HOST="${HOST%%/*}"
-[ -f "$STORE" ] && . "$STORE"
 
 # </dev/null — чтобы CLI не ушёл в интерактивный вопрос и не завис
 rail(){ railway "$@" </dev/null 2>/dev/null; }
