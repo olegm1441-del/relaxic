@@ -20,7 +20,7 @@ test("landing is served with the metric counter", async () => {
   const body = await response.text();
   assert.equal(response.status, 200);
   assert.match(body, /data-metrika-id="113818310"/);
-  assert.match(body, /Соберите свою/);
+  assert.match(body, /Соберите картину/);
   assert.match(response.headers.get("content-security-policy"), /mc\.yandex\.ru/);
 });
 
