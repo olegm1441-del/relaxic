@@ -1,12 +1,10 @@
 [build]
-  builder = "DOCKERFILE"
-  dockerfilePath = "Dockerfile"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
-  # Схему и демо-данные накатывает scripts/start.mjs — отдельный
-  # preDeployCommand делал ту же работу второй раз, поднимая на каждом
-  # выкате ещё один процесс Prisma под четверть гигабайта.
-  startCommand = "node scripts/start.mjs"
-  healthcheckPath = "/api/health"
-  healthcheckTimeout = 300
-  restartPolicyType = "ON_FAILURE"
+startCommand = "node server.mjs"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

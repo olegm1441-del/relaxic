@@ -1,54 +1,13 @@
-# syntax=docker/dockerfile:1
-#
-# Своя сборка вместо Nixpacks: тот подставлял --mount=type=cache
-# в каждый шаг, и сборщик Railway падал на монтировании кеша.
+FROM node:22-alpine
 
-FROM node:22-bookworm-slim AS base
-ENV NEXT_TELEMETRY_DISABLED=1
-# openssl нужен Prisma для TLS к базе
-RUN apt-get update \
- && apt-get install -y --no-install-recommends openssl ca-certificates \
- && rm -rf /var/lib/apt/lists/*
+ENV NODE_ENV=production \
+    HOSTNAME=0.0.0.0 \
+    PORT=3000
+
 WORKDIR /app
+COPY --chown=node:node package.json server.mjs ./
+COPY --chown=node:node public ./public
 
-# ── Сборка ───────────────────────────────────────────────────
-FROM base AS build
-# NODE_ENV здесь НЕ задаём. При NODE_ENV=development next build
-# собирает страницы по боевому пути, а React подтягивает dev-сборку —
-# пререндер /_global-error падает с «Cannot read properties of null
-# (reading 'useContext')». devDependencies ставит флаг --include=dev.
-# prisma/ копируется ДО npm ci. В package.json есть postinstall,
-# который вызывает prisma generate, а без схемы он падает с
-# «Could not find Prisma Schema» и роняет всю установку.
-COPY package.json package-lock.json ./
-COPY prisma ./prisma
-RUN npm ci --include=dev --no-audit --no-fund
-COPY . .
-RUN npm run build
-
-# ── Рантайм ──────────────────────────────────────────────────
-FROM base AS runner
-ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
-
-# Только боевые зависимости. prisma лежит в dependencies намеренно:
-# схему и демо-данные накатывает scripts/start.mjs уже в этом образе.
-# Порядок тот же: схема раньше установки.
-COPY package.json package-lock.json ./
-COPY prisma ./prisma
-RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
-
-COPY prisma.config.ts next.config.ts ./
-COPY scripts ./scripts
-# lib/ нужен не сборке, а рантайму: prisma/seed.mjs читает lib/data/catalog.mjs
-COPY lib ./lib
-COPY public ./public
-COPY --from=build /app/.next ./.next
-# Кеш сборщика (порядка 120 МБ) в готовом образе не нужен ни на байт:
-# он нужен только повторной сборке, а здесь занимает место на диске
-# и место в файловом кеше ядра — а его Railway считает как память.
-RUN rm -rf .next/cache
-
+USER node
 EXPOSE 3000
-# Напрямую, не через npm: обёртка npm висит рядом с сервером
-# всё время работы и держит под 90 МБ впустую.
-CMD ["node", "scripts/start.mjs"]
+CMD ["node", "server.mjs"]

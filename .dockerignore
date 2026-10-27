@@ -1,11 +1,6 @@
-node_modules
-.next
 .git
-.env
-.env*.local
-docs
+.github
+node_modules
+test
 *.log
 .DS_Store
-tsconfig.tsbuildinfo
-# Оригиналы картинок на сервере не нужны: туда уезжает только public/img
-assets

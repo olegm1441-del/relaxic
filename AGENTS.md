@@ -1,9 +1,11 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# Relaxic landing
 
-# This is NOT the Next.js you know
+This branch intentionally contains only the low-cost landing page. The full
+store is preserved in `archive/full-site-2026-10-27`.
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+- Use the existing checkout; do not create a worktree unless explicitly asked.
+- The app has no npm dependencies and no build step.
+- Run `npm run check` for tests and `npm start` for local development.
+- Verify `/`, `/landing.js`, and `/api/health` after changes.
+- Every landing-page link is intentionally intercepted by `public/landing.js`.
+- The Yandex Metrika JavaScript goal is `landing_link_click`.

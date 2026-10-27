@@ -1,21 +1,6 @@
-# Что не нужно на сервере. Заливка идёт напрямую папкой, и каждый лишний
-# мегабайт — это лишние секунды под обрыв соединения.
-
-# Оригиналы картинок — 65 МБ, которые заливались каждый раз впустую:
-# в образ едет только public/img, а assets Dockerfile выбрасывает
-# (см. .dockerignore). Из-за них заливка весила 90 МБ вместо 26
-# и рвалась на полпути с «Connection reset by peer».
-assets/
-
-docs/
-scripts/tz-docx/
 .git/
-.deploy.local
-prisma/dev.db*
-*.zip
-*.pptx
-*.docx
-tsconfig.tsbuildinfo
+.github/
+node_modules/
+test/
 *.log
-.claude/
-.vscode/
+.DS_Store
