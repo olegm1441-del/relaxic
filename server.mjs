@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "public");
-const metrikaId = String(process.env.YANDEX_METRIKA_ID || "113157679").replace(/\D/g, "");
+const metrikaId = String(process.env.YANDEX_METRIKA_ID || "113818310").replace(/\D/g, "");
 const commit = (process.env.RAILWAY_GIT_COMMIT_SHA || process.env.GIT_COMMIT || "local").slice(0, 7);
 
 const files = new Map([
