@@ -34,7 +34,7 @@ const securityHeaders = {
     "default-src 'self'",
     "script-src 'self' https://mc.yandex.ru",
     "connect-src 'self' https://mc.yandex.ru https://mc.yandex.com",
-    "img-src 'self' data: https://mc.yandex.ru https://mc.yandex.com",
+    "img-src 'self' data: blob: https://mc.yandex.ru https://mc.yandex.com",
     "style-src 'self'",
     "font-src 'self'",
     "frame-ancestors 'none'",
