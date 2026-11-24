@@ -8,6 +8,12 @@ const metrikaId = String(process.env.YANDEX_METRIKA_ID || "113818310").replace(/
 const commit = (process.env.RAILWAY_GIT_COMMIT_SHA || process.env.GIT_COMMIT || "local").slice(0, 7);
 
 const files = new Map([
+  ["/app", ["app.html", "text/html; charset=utf-8"]],
+  ["/app/", ["app.html", "text/html; charset=utf-8"]],
+  ["/app.css", ["app.css", "text/css; charset=utf-8"]],
+  ["/app.js", ["app.js", "text/javascript; charset=utf-8"]],
+  ["/manifest.webmanifest", ["manifest.webmanifest", "application/manifest+json"]],
+  ["/app-sw.js", ["app-sw.js", "text/javascript; charset=utf-8"]],
   ["/styles.css", ["styles.css", "text/css; charset=utf-8"]],
   ["/landing.js", ["landing.js", "text/javascript; charset=utf-8"]],
   ["/robots.txt", ["robots.txt", "text/plain; charset=utf-8"]],
@@ -145,7 +151,7 @@ export function createApp() {
       const file = files.get(pathname);
       if (file) {
         const body = await readFile(path.join(root, file[0]));
-        send(res, 200, body, file[1], "public, max-age=31536000, immutable", head);
+        send(res, 200, body, file[1], pathname.startsWith("/app") || pathname === "/manifest.webmanifest" ? "no-cache" : "public, max-age=31536000, immutable", head);
         return;
       }
 

@@ -29,7 +29,7 @@ test("navigation and bot links are tracked; unavailable store links remain pause
   const anchors = [...html.matchAll(/<a\b([^>]*)>/g)].map((match) => match[1]);
   assert.ok(anchors.length >= 10);
   for (const attributes of anchors) {
-    assert.match(attributes, /href="(?:#|#collections|#about|\/bot|\/gallery)"/);
+    assert.match(attributes, /href="(?:#|#collections|#about|\/bot|\/gallery|\/app)"/);
     assert.match(attributes, /tracked-link/);
     assert.match(attributes, /data-link-name=/);
   }
@@ -58,4 +58,14 @@ test("old routes are unavailable", async () => {
 test("only known static files are served", async () => {
   const response = await fetch(`${base}/package.json`);
   assert.equal(response.status, 404);
+});
+
+test("installable Relaxic app and manifest are available", async () => {
+ const a=await fetch(base+"/app"); assert.equal(a.status,200);
+ assert.match(await a.text(), /manifest.webmanifest/);
+ const m=await (await fetch(base+"/manifest.webmanifest")).json();
+ assert.equal(m.display,"standalone"); assert.equal(m.start_url,"/app");
+ for (const p of ["/app.css","/app.js","/app-sw.js","/icon-192.png","/icon-512.png"]) {
+  assert.equal((await fetch(base+p)).status,200);
+ }
 });
