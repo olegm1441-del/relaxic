@@ -52,20 +52,78 @@ function send(res, status, body, type, cache = "no-store", head = false) {
   res.end(head ? undefined : payload);
 }
 
+// Read-only gallery and capability-protected artwork management are served
+// by the existing Relaxic bot, with a fixed upstream (no arbitrary proxy URLs).
+const artworkOrigin = "https://relaxic-bot-production.up.railway.app";
+const artworkRoute = /^\/artwork\/(?:manage|private)\/[a-f0-9]{64}$|^\/artwork\/public\/[a-f0-9]{24}$/;
+async function proxyArtwork(req, res, pathname, head) {
+  const isManage = /^\/artwork\/manage\/[a-f0-9]{64}$/.test(pathname);
+  if (req.method !== "GET" && !head && !(isManage && req.method === "POST")) {
+    return send(res, 405, "Method Not Allowed\n", "text/plain; charset=utf-8");
+  }
+  let body;
+  if (req.method === "POST") {
+    if (!(req.headers["content-type"] || "").startsWith("application/x-www-form-urlencoded")) {
+      return send(res, 415, "Unsupported content type\n", "text/plain; charset=utf-8");
+    }
+    let length = 0;
+    const chunks = [];
+    for await (const chunk of req) {
+      length += chunk.length;
+      if (length > 1024) return send(res, 413, "Request too large\n", "text/plain; charset=utf-8");
+      chunks.push(chunk);
+    }
+    body = Buffer.concat(chunks);
+  }
+  try {
+    const remote = await fetch(artworkOrigin + pathname, {
+      method: head ? "GET" : req.method,
+      ...(body ? {body, headers: {"content-type": "application/x-www-form-urlencoded"}} : {}),
+      redirect: "manual",
+      signal: AbortSignal.timeout(12000),
+    });
+    const location = remote.headers.get("location");
+    if (location && [302,303].includes(remote.status)) {
+      if (pathname === "/bot" && /^https:\/\/t\.me\/[a-zA-Z0-9_]+$/.test(location) ||
+          isManage && location === pathname) {
+        res.writeHead(remote.status, {location, "cache-control":"no-store","referrer-policy":"no-referrer"});
+        return res.end();
+      }
+      return send(res, 502, "Invalid redirect\n", "text/plain; charset=utf-8");
+    }
+    const type = remote.headers.get("content-type") || "text/plain; charset=utf-8";
+    if (!/^(text\/html|text\/plain|image\/jpeg)(?:;|$)/.test(type)) {
+      return send(res, 502, "Invalid response\n", "text/plain; charset=utf-8");
+    }
+    const data = Buffer.from(await remote.arrayBuffer());
+    res.writeHead(remote.status, {
+      "content-type": type, "content-length": data.length,
+      "cache-control": "no-store", "referrer-policy": "no-referrer",
+      "x-content-type-options":"nosniff","x-frame-options":"DENY","x-robots-tag":"noindex, nofollow",
+      "content-security-policy":"default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+    });
+    return res.end(head ? undefined : data);
+  } catch {
+    return send(res, 503, "Галерея или бот временно недоступны. Попробуйте позже.\n", "text/plain; charset=utf-8","no-store",head);
+  }
+}
+
 export function createApp() {
   return createServer(async (req, res) => {
     const head = req.method === "HEAD";
-    if (req.method !== "GET" && !head) {
-      send(res, 405, "Method Not Allowed\n", "text/plain; charset=utf-8", "no-store", head);
-      return;
-    }
-
     let pathname;
     try {
       pathname = new URL(req.url || "/", "http://localhost").pathname;
     } catch {
       send(res, 400, "Bad Request\n", "text/plain; charset=utf-8", "no-store", head);
       return;
+    }
+
+    if (pathname === "/gallery" || pathname === "/bot" || artworkRoute.test(pathname)) {
+      return proxyArtwork(req, res, pathname, head);
+    }
+    if (req.method !== "GET" && !head) {
+      return send(res, 405, "Method Not Allowed\n", "text/plain; charset=utf-8", "no-store", head);
     }
 
     try {

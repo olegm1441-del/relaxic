@@ -50,7 +50,8 @@ function showPausedMessage() {
 
 document.querySelectorAll("a.tracked-link").forEach((link) => {
   link.addEventListener("click", (event) => {
-    event.preventDefault();
+    const paused = link.getAttribute("href") === "#";
+    if (paused) event.preventDefault();
     const label = link.dataset.linkName || link.textContent.trim().slice(0, 80);
     if (analyticsAllowed && typeof window.ym === "function") {
       window.ym(METRIKA_ID, "reachGoal", GOAL, {
@@ -58,7 +59,7 @@ document.querySelectorAll("a.tracked-link").forEach((link) => {
         page: window.location.pathname,
       });
     }
-    showPausedMessage();
+    if (paused) showPausedMessage();
   });
 });
 

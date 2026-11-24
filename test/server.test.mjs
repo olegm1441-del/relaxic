@@ -24,16 +24,18 @@ test("landing is served with the metric counter", async () => {
   assert.match(response.headers.get("content-security-policy"), /mc\.yandex\.ru/);
 });
 
-test("every visible link stays on the landing and is tracked", async () => {
+test("navigation and bot links are tracked; unavailable store links remain paused", async () => {
   const html = await (await fetch(`${base}/`)).text();
   const anchors = [...html.matchAll(/<a\b([^>]*)>/g)].map((match) => match[1]);
   assert.ok(anchors.length >= 10);
   for (const attributes of anchors) {
-    assert.match(attributes, /href="#"/);
+    assert.match(attributes, /href="(?:#|#collections|#about|\/bot|\/gallery)"/);
     assert.match(attributes, /tracked-link/);
     assert.match(attributes, /data-link-name=/);
   }
 
+  assert.match(html, /href="\/gallery"/);
+  assert.match(html, /href="\/bot"/);
   const script = await (await fetch(`${base}/landing.js`)).text();
   assert.match(script, /landing_link_click/);
   assert.match(script, /"reachGoal"/);

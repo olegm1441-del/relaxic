@@ -24,9 +24,9 @@
         <img src="/img/brand/wordmark-dark.png" width="1053" height="250" alt="Relaxic">
       </a>
       <nav aria-label="Основная навигация">
-        <a class="nav-link tracked-link" href="#" data-link-name="catalog">Коллекции</a>
-        <a class="nav-link tracked-link" href="#" data-link-name="about">О нас</a>
-        <a class="status-link tracked-link" href="#" data-link-name="launch">Магазин скоро вернётся</a>
+        <a class="nav-link tracked-link" href="#collections" data-link-name="catalog">Коллекции</a>
+        <a class="nav-link tracked-link" href="#about" data-link-name="about">О нас</a>
+        <a class="status-link tracked-link" href="/bot" data-link-name="launch">Чат-бот</a>
       </nav>
     </header>
 
@@ -42,8 +42,8 @@
           <h1 id="hero-title">Соберите картину<br><em>по номерам!</em></h1>
           <p class="hero-copy">Картины по номерам, алмазные мозаики и вышивка по кадрам из кино, игр и аниме. Спокойный вечер, который остаётся с вами на стене.</p>
           <div class="hero-actions">
-            <a class="button button-primary tracked-link" href="#" data-link-name="hero_catalog">Смотреть коллекцию <span>→</span></a>
-            <a class="button button-ghost tracked-link" href="#" data-link-name="hero_launch">Узнать о запуске</a>
+            <a class="button button-primary tracked-link" href="#collections" data-link-name="hero_catalog">Смотреть коллекцию <span>→</span></a>
+            <a class="button button-ghost tracked-link" href="/bot" data-link-name="hero_launch">Создать свой сюжет</a>
           </div>
           <dl class="facts">
             <div><dt>3</dt><dd>техники</dd></div>
@@ -62,7 +62,7 @@
         </div>
       </section>
 
-      <section class="collection shell" aria-label="Примеры коллекции">
+      <section class="collection shell" id="collections" aria-label="Примеры коллекции">
         <article class="story-card story-large">
           <a class="card-link tracked-link" href="#" data-link-name="card_great_hall">
             <img src="/img/product/great-hall-1.jpg" width="900" height="1200" alt="Алмазная мозаика с большим залом">
@@ -86,7 +86,7 @@
         </article>
       </section>
 
-      <section class="manifesto">
+      <section class="manifesto" id="about">
         <div class="shell manifesto-grid">
           <div class="manifesto-photo"><img src="/img/mood/workshop.jpg" width="900" height="1100" alt="Мастерская Relaxic"></div>
           <div class="manifesto-copy">
@@ -102,11 +102,17 @@
         </div>
       </section>
 
+      <section class="closing shell" id="author-art">
+        <p class="eyebrow">Ваши истории</p>
+        <h2>Свой сюжет —<br>на вашем холсте.</h2>
+        <p>Загрузите фотографию в чат-боте. Она появится на вашей личной странице как закрытый эскиз. Вы сами решаете, показывать ли её в галерее. Магазин и печать пока на этапе подготовки.</p>
+        <div class="hero-actions"><a class="button button-primary tracked-link" href="/bot" data-link-name="custom_bot">Загрузить свой сюжет <span>→</span></a><a class="button button-ghost tracked-link" href="/gallery" data-link-name="author_gallery">Галерея работ</a></div>
+      </section>
       <section class="closing shell">
         <p class="eyebrow">Relaxic вернётся</p>
         <h2>Оставьте вечер<br>для себя.</h2>
         <p>Полная коллекция временно спит. Мы сохранили всё и вернём магазин, когда он снова будет нужен.</p>
-        <a class="button button-primary tracked-link" href="#" data-link-name="closing_launch">Сообщить мне о запуске <span>→</span></a>
+        <a class="button button-primary tracked-link" href="/bot" data-link-name="closing_launch">Спросить консультанта <span>→</span></a>
       </section>
     </main>
 
@@ -114,7 +120,7 @@
       <a class="brand footer-brand tracked-link" href="#" data-link-name="footer_logo"><img src="/img/brand/wordmark-dark.png" width="1053" height="250" alt="Relaxic"></a>
       <p>Наборы для творчества по любимым вселенным.<br>Казань · работаем по России</p>
       <div class="footer-links">
-        <a class="tracked-link" href="#" data-link-name="footer_contacts">Контакты</a>
+        <a class="tracked-link" href="/bot" data-link-name="footer_contacts">Контакты</a>
         <a class="tracked-link" href="#" data-link-name="footer_delivery">Доставка</a>
         <a class="tracked-link" href="#" data-link-name="footer_privacy">Конфиденциальность</a>
       </div>
