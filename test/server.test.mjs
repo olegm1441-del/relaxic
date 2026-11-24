@@ -69,3 +69,11 @@ test("installable Relaxic app and manifest are available", async () => {
   assert.equal((await fetch(base+p)).status,200);
  }
 });
+
+test("reviews reject invalid methods and non-JSON submissions", async () => {
+ assert.equal((await fetch(base+"/api/reviews",{method:"PUT"})).status,405);
+ assert.equal((await fetch(base+"/api/reviews",{method:"POST",body:"bad"})).status,415);
+ assert.equal((await fetch(base+"/api/reviews",{method:"POST",headers:{"Content-Type":"application/json"},body:"null"})).status,400);
+ const code=await (await fetch(base+"/app.js")).text();
+ assert.match(code,/submitReview/);assert.match(code,/quizSteps/);
+});
