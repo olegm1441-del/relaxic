@@ -84,3 +84,11 @@ test("custom order routes reject invalid requests",async()=>{
  const s=await (await fetch(base+"/app.js")).text();
  assert.match(s,/drawCrop/);assert.match(s,/placeOrder/);
 });
+
+test("studio offers nondestructive framed and material previews",async()=>{
+ const js=await(await fetch(base+"/app.js")).text();
+ const css=await(await fetch(base+"/app.css")).text();
+ assert.match(js,/updateMaterialPreview/);assert.match(js,/art-surface/);
+ assert.match(css,/data-material="mosaic"/);assert.match(css,/data-material="stitch"/);
+ assert.match(js,/cropData=can\.toDataURL/);
+});
