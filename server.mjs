@@ -115,7 +115,7 @@ async function proxyArtwork(req, res, pathname, head) {
 }
 
 
-async function proxyReviews(req,res,head) {
+async function proxyReviews(req,res,head,route="/api/reviews") {
  const reply=(status,data)=>send(res,status,JSON.stringify(data),"application/json; charset=utf-8","no-store",head);
  if(!["GET","HEAD","POST"].includes(req.method))return reply(405,{error:"Метод не поддерживается."});
  try{
@@ -125,11 +125,11 @@ async function proxyReviews(req,res,head) {
    if(origin&&origin!=="https://relaxic-production.up.railway.app"&&origin!=="https://"+req.headers.host&&origin!=="http://"+req.headers.host)return reply(403,{error:"Недопустимый источник."});
    if(!String(req.headers["content-type"]||"").startsWith("application/json"))return reply(415,{error:"Неверный формат."});
    const chunks=[];let bytes=0;
-   for await(const chunk of req){bytes+=chunk.length;if(bytes>4096)return reply(413,{error:"Слишком длинный запрос."});chunks.push(chunk);}
+   for await(const chunk of req){bytes+=chunk.length;if(bytes>(route==="/api/custom-orders"?2100000:4096))return reply(413,{error:"Слишком длинный запрос."});chunks.push(chunk);}
    body=Buffer.concat(chunks);
    try{const x=JSON.parse(body.toString("utf8"));if(!x||typeof x!=="object"||Array.isArray(x))throw Error();}catch{return reply(400,{error:"Неверный формат."});}
   }
-  const response=await fetch(artworkOrigin+"/api/reviews",{method:head?"GET":req.method,...(body?{body,headers:{"content-type":"application/json"}}:{}),signal:AbortSignal.timeout(15000),redirect:"error"});
+  const response=await fetch(artworkOrigin+route,{method:head?"GET":req.method,...(body?{body,headers:{"content-type":"application/json"}}:{}),signal:AbortSignal.timeout(15000),redirect:"error"});
   if(!String(response.headers.get("content-type")).startsWith("application/json"))return reply(502,{error:"Сервис отзывов недоступен."});
   return reply(response.status,await response.json());
  }catch{return reply(503,{error:"Не удалось связаться с сервисом отзывов. Попробуйте позже."});}
@@ -146,7 +146,7 @@ export function createApp() {
       return;
     }
 
-    if (pathname === "/api/reviews") return proxyReviews(req,res,head);
+    if (pathname === "/api/reviews" || pathname === "/api/custom-orders") return proxyReviews(req,res,head,pathname);
     if (pathname === "/gallery" || pathname === "/bot" || artworkRoute.test(pathname)) {
       return proxyArtwork(req, res, pathname, head);
     }

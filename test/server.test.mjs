@@ -77,3 +77,10 @@ test("reviews reject invalid methods and non-JSON submissions", async () => {
  const code=await (await fetch(base+"/app.js")).text();
  assert.match(code,/submitReview/);assert.match(code,/quizSteps/);
 });
+
+test("custom order routes reject invalid requests",async()=>{
+ assert.equal((await fetch(base+"/api/custom-orders",{method:"PUT"})).status,405);
+ assert.equal((await fetch(base+"/api/custom-orders",{method:"POST",body:"x"})).status,415);
+ const s=await (await fetch(base+"/app.js")).text();
+ assert.match(s,/drawCrop/);assert.match(s,/placeOrder/);
+});
